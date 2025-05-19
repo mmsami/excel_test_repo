@@ -46,11 +46,3 @@ jobs:
           python .github/scripts/excel_converter.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload XML diff reports
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: xml-diff-reports
-          path: xml-diff-reports/
-          retention-days: 5
