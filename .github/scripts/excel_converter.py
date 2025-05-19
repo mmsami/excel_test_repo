@@ -26,6 +26,43 @@ def extract_excel(excel_path):
     print(f"Extracted {excel_path} to {excel_dir}/")
     return excel_dir
 
+def format_xml_files(directory):
+    """Format XML files for better diffing"""
+    try:
+        # Try to import xmlformatter, install if not available
+        try:
+            from xmlformatter import Formatter
+        except ImportError:
+            import subprocess
+            print("Installing xmlformatter...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "xmlformatter"])
+            from xmlformatter import Formatter
+        
+        formatter = Formatter(indent="  ", indent_attributes=True, max_attribute_length=50)
+        
+        xml_count = 0
+        for root, _, files in os.walk(directory):
+            for file in files:
+                if file.endswith('.xml'):
+                    file_path = os.path.join(root, file)
+                    try:
+                        with open(file_path, 'rb') as f:
+                            content = f.read()
+                        
+                        formatted_content = formatter.format_string(content)
+                        
+                        with open(file_path, 'wb') as f:
+                            f.write(formatted_content)
+                            
+                        xml_count += 1
+                    except Exception as e:
+                        print(f"Error formatting {file_path}: {e}")
+        
+        print(f"Formatted {xml_count} XML files in {directory}")
+    except Exception as e:
+        print(f"Warning: XML formatting failed - {e}")
+        print("Continuing without XML formatting...")
+
 def package_xml_to_excel(xml_dir):
     """Package XML directory back to Excel file"""
     excel_path = Path(f"{xml_dir}.xlsx")
@@ -96,6 +133,9 @@ def process_excel_files():
         # Extract Excel to directory
         extract_dir = extract_excel(excel_file)
         
+        # Format XML files for better diffing
+        format_xml_files(extract_dir)
+        
         # Add the extracted files to git
         repo = git.Repo('.')
         repo.git.add(str(extract_dir))
@@ -150,6 +190,55 @@ def process_xml_files():
     
     return list(xml_dirs)
 
+def generate_xml_diff_report(xml_dirs):
+    """Generate human-readable XML diff report"""
+    try:
+        # Try to create an artifacts directory
+        artifacts_dir = Path("xml-diff-reports")
+        os.makedirs(artifacts_dir, exist_ok=True)
+        
+        # For each XML directory, find modified XML files
+        repo = git.Repo('.')
+        
+        for xml_dir in xml_dirs:
+            # Get list of XML files in this directory
+            xml_files = []
+            for root, _, files in os.walk(xml_dir):
+                for file in files:
+                    if file.endswith('.xml'):
+                        xml_files.append(os.path.join(root, file))
+            
+            # Create a report file
+            report_file = artifacts_dir / f"{Path(xml_dir).name}-diff-report.txt"
+            
+            with open(report_file, 'w') as f:
+                f.write(f"XML Diff Report for {xml_dir}\n")
+                f.write("="*50 + "\n\n")
+                
+                for xml_file in xml_files:
+                    rel_path = os.path.relpath(xml_file, '.')
+                    try:
+                        # Get the diff for this file
+                        diff = repo.git.diff('HEAD~1', xml_file)
+                        
+                        if diff:
+                            f.write(f"\nChanges in {rel_path}:\n")
+                            f.write("-"*50 + "\n")
+                            
+                            # Process diff to make XML entities more readable
+                            processed_diff = diff.replace('&amp;', '[&]').replace('&lt;', '[<]').replace('&gt;', '[>]').replace('&quot;', '["]')
+                            
+                            f.write(processed_diff + "\n\n")
+                    except Exception as e:
+                        f.write(f"\nError getting diff for {rel_path}: {e}\n")
+            
+            print(f"Created XML diff report at {report_file}")
+        
+        return artifacts_dir
+    except Exception as e:
+        print(f"Warning: Failed to generate XML diff report - {e}")
+        return None
+
 def commit_changes():
     """Commit any changes and push to repository"""
     repo = git.Repo('.')
@@ -192,6 +281,10 @@ def main():
     # Process XML files (package to Excel)
     xml_dirs = process_xml_files()
     print(f"Processed {len(xml_dirs)} XML directories")
+    
+    # Generate XML diff report
+    if xml_dirs:
+        generate_xml_diff_report(xml_dirs)
     
     # Commit and push changes
     commit_changes()
