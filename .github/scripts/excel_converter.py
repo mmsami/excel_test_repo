@@ -191,11 +191,11 @@ def process_xml_files():
     return list(xml_dirs)
 
 def generate_xml_diff_report(xml_dirs):
-    """Generate human-readable XML diff report"""
+    """Generate human-readable XML diff report and commit it to the repository"""
     try:
-        # Try to create an artifacts directory
-        artifacts_dir = Path("xml-diff-reports")
-        os.makedirs(artifacts_dir, exist_ok=True)
+        # Create reports directory in the repository
+        reports_dir = Path("xml-diff-reports")
+        os.makedirs(reports_dir, exist_ok=True)
         
         # For each XML directory, find modified XML files
         repo = git.Repo('.')
@@ -209,11 +209,10 @@ def generate_xml_diff_report(xml_dirs):
                         xml_files.append(os.path.join(root, file))
             
             # Create a report file
-            report_file = artifacts_dir / f"{Path(xml_dir).name}-diff-report.txt"
+            report_file = reports_dir / f"{Path(xml_dir).name}-diff-report.md"
             
             with open(report_file, 'w') as f:
-                f.write(f"XML Diff Report for {xml_dir}\n")
-                f.write("="*50 + "\n\n")
+                f.write(f"# XML Diff Report for {xml_dir}\n\n")
                 
                 for xml_file in xml_files:
                     rel_path = os.path.relpath(xml_file, '.')
@@ -222,19 +221,23 @@ def generate_xml_diff_report(xml_dirs):
                         diff = repo.git.diff('HEAD~1', xml_file)
                         
                         if diff:
-                            f.write(f"\nChanges in {rel_path}:\n")
-                            f.write("-"*50 + "\n")
+                            f.write(f"## Changes in {rel_path}\n\n")
+                            f.write("```diff\n")
                             
                             # Process diff to make XML entities more readable
                             processed_diff = diff.replace('&amp;', '[&]').replace('&lt;', '[<]').replace('&gt;', '[>]').replace('&quot;', '["]')
                             
-                            f.write(processed_diff + "\n\n")
+                            f.write(processed_diff + "\n")
+                            f.write("```\n\n")
                     except Exception as e:
-                        f.write(f"\nError getting diff for {rel_path}: {e}\n")
+                        f.write(f"Error getting diff for {rel_path}: {e}\n\n")
             
             print(f"Created XML diff report at {report_file}")
         
-        return artifacts_dir
+        # Add the reports to git
+        repo.git.add(str(reports_dir))
+        
+        return reports_dir
     except Exception as e:
         print(f"Warning: Failed to generate XML diff report - {e}")
         return None
