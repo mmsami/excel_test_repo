@@ -38,7 +38,8 @@ def format_xml_files(directory):
             subprocess.check_call([sys.executable, "-m", "pip", "install", "xmlformatter"])
             from xmlformatter import Formatter
         
-        formatter = Formatter(indent="  ", indent_attributes=True, max_attribute_length=50)
+        # Use only supported parameters
+        formatter = Formatter(indent="  ")
         
         xml_count = 0
         for root, _, files in os.walk(directory):
@@ -191,48 +192,93 @@ def process_xml_files():
     return list(xml_dirs)
 
 def generate_xml_diff_report(xml_dirs):
-    """Generate human-readable XML diff report and commit it to the repository"""
+    """Generate human-readable XML diff report with smart truncation"""
     try:
-        # Create reports directory in the repository
         reports_dir = Path("xml-diff-reports")
         os.makedirs(reports_dir, exist_ok=True)
-        
-        # For each XML directory, find modified XML files
         repo = git.Repo('.')
         
         for xml_dir in xml_dirs:
-            # Get list of XML files in this directory
-            xml_files = []
-            for root, _, files in os.walk(xml_dir):
-                for file in files:
-                    if file.endswith('.xml'):
-                        xml_files.append(os.path.join(root, file))
+            # Create summary and detailed reports
+            summary_file = reports_dir / f"{Path(xml_dir).name}-summary.md"
             
-            # Create a report file
-            report_file = reports_dir / f"{Path(xml_dir).name}-diff-report.md"
-            
-            with open(report_file, 'w') as f:
-                f.write(f"# XML Diff Report for {xml_dir}\n\n")
+            with open(summary_file, 'w') as f:
+                f.write(f"# XML Changes Summary for {xml_dir}\n\n")
                 
-                for xml_file in xml_files:
-                    rel_path = os.path.relpath(xml_file, '.')
-                    try:
-                        # Get the diff for this file
-                        diff = repo.git.diff('HEAD~1', xml_file)
-                        
-                        if diff:
-                            f.write(f"## Changes in {rel_path}\n\n")
-                            f.write("```diff\n")
+                # Track total changes across all files
+                total_changes = 0
+                important_files = []
+                
+                # Process each XML file
+                for root, _, files in os.walk(xml_dir):
+                    for file in files:
+                        if file.endswith('.xml'):
+                            file_path = os.path.join(root, file)
+                            rel_path = os.path.relpath(file_path, '.')
                             
-                            # Process diff to make XML entities more readable
-                            processed_diff = diff.replace('&amp;', '[&]').replace('&lt;', '[<]').replace('&gt;', '[>]').replace('&quot;', '["]')
-                            
-                            f.write(processed_diff + "\n")
-                            f.write("```\n\n")
-                    except Exception as e:
-                        f.write(f"Error getting diff for {rel_path}: {e}\n\n")
+                            try:
+                                # Get the diff
+                                diff = repo.git.diff('HEAD~1', file_path)
+                                
+                                # Skip files with no changes
+                                if not diff:
+                                    continue
+                                    
+                                # Count added/removed lines
+                                added = diff.count('\n+')
+                                removed = diff.count('\n-')
+                                changes = added + removed
+                                
+                                if changes > 0:
+                                    total_changes += changes
+                                    
+                                    # Record important files (those with significant changes)
+                                    importance = "HIGH" if changes > 10 else "MEDIUM" if changes > 3 else "LOW"
+                                    important_files.append((rel_path, changes, importance))
+                            except Exception as e:
+                                f.write(f"Error analyzing {rel_path}: {e}\n\n")
+                
+                # Write summary
+                f.write(f"**Total changes:** {total_changes} lines modified\n\n")
+                f.write("## Modified Files\n\n")
+                f.write("| File | Changes | Importance |\n")
+                f.write("|------|---------|------------|\n")
+                
+                for file_path, changes, importance in sorted(important_files, key=lambda x: x[1], reverse=True):
+                    f.write(f"| {file_path} | {changes} | {importance} |\n")
+                
+                f.write("\n## Details\n\n")
+                f.write("For detailed changes in specific files, see subdirectories in this report.\n")
             
-            print(f"Created XML diff report at {report_file}")
+            # Create detailed reports directory 
+            details_dir = reports_dir / f"{Path(xml_dir).name}-details"
+            os.makedirs(details_dir, exist_ok=True)
+            
+            # Process most important files first
+            for file_path, changes, _ in sorted(important_files, key=lambda x: x[1], reverse=True)[:10]:
+                try:
+                    # Get the full file path
+                    full_path = os.path.join('.', file_path)
+                    
+                    # Create detail file
+                    detail_file = details_dir / f"{Path(file_path).name}-diff.md"
+                    
+                    with open(detail_file, 'w') as f:
+                        f.write(f"# Changes in {file_path}\n\n")
+                        
+                        # Get diff
+                        diff = repo.git.diff('HEAD~1', full_path)
+                        
+                        # Process diff for readability
+                        processed_diff = diff.replace('&amp;', '[&]').replace('&lt;', '[<]').replace('&gt;', '[>]')
+                        
+                        f.write("```diff\n")
+                        f.write(processed_diff)
+                        f.write("\n```\n")
+                except Exception as e:
+                    print(f"Error creating detail report for {file_path}: {e}")
+            
+            print(f"Created XML diff reports for {xml_dir}")
         
         # Add the reports to git
         repo.git.add(str(reports_dir))
