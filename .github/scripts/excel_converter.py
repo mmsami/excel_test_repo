@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Excel XML Conversion for GitHub Actions
-Handles both extraction and packaging in a single script
+Extracts VBA code and table structure for diffing, generates artifact reports
 """
 
 import os
@@ -13,24 +13,94 @@ import git
 import re
 from pathlib import Path
 
-def extract_excel(excel_path):
-    """Extract Excel file to directory with same name"""
-    excel_dir = Path(excel_path).with_suffix('')
-    
+def extract_excel_selective(excel_path, output_dir):
+    """Extract only VBA, table definitions, and structure from Excel file"""
     # Create directory if it doesn't exist
-    os.makedirs(excel_dir, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
     
-    # Extract Excel as zip to directory
+    # Extract Excel as zip to temporary directory
+    temp_dir = Path(f"{output_dir}_temp")
+    os.makedirs(temp_dir, exist_ok=True)
+    
     with zipfile.ZipFile(excel_path, 'r') as zip_ref:
-        zip_ref.extractall(excel_dir)
+        zip_ref.extractall(temp_dir)
     
-    print(f"Extracted {excel_path} to {excel_dir}/")
-    return excel_dir
+    # Copy only the files we care about
+    # First, essential files for Excel structure
+    essential_files = [
+        '[Content_Types].xml',
+        'Content_Types.xml',
+        '_rels/.rels',
+    ]
+    
+    for file in essential_files:
+        src = temp_dir / file
+        if src.exists():
+            # Create parent directories if needed
+            dst = output_dir / file
+            os.makedirs(dst.parent, exist_ok=True)
+            shutil.copy2(src, dst)
+    
+    # Copy all VBA-related files
+    vba_paths = ['xl/vbaProject.bin', 'xl/_rels/vbaProject.bin.rels', 'xl/vba/']
+    for vba_path in vba_paths:
+        src = temp_dir / vba_path
+        if src.exists():
+            if src.is_dir():
+                dst = output_dir / vba_path
+                shutil.copytree(src, dst, dirs_exist_ok=True)
+            else:
+                dst = output_dir / vba_path
+                os.makedirs(dst.parent, exist_ok=True)
+                shutil.copy2(src, dst)
+    
+    # Copy all table definitions
+    tables_dir = temp_dir / 'xl/tables'
+    if tables_dir.exists():
+        dst_tables = output_dir / 'xl/tables'
+        shutil.copytree(tables_dir, dst_tables, dirs_exist_ok=True)
+    
+    # Copy worksheet structure files, but remove data
+    worksheets_dir = temp_dir / 'xl/worksheets'
+    if worksheets_dir.exists():
+        # Create destination directory
+        dst_worksheets = output_dir / 'xl/worksheets'
+        os.makedirs(dst_worksheets, exist_ok=True)
+        
+        # Process each worksheet
+        for sheet_file in worksheets_dir.glob('*.xml'):
+            # Process the worksheet to remove data but keep structure
+            process_worksheet_structure(sheet_file, dst_worksheets / sheet_file.name)
+    
+    # Clean up temp directory
+    shutil.rmtree(temp_dir)
+    
+    print(f"Extracted code and structure from {excel_path} to {output_dir}/")
+    return output_dir
+
+def process_worksheet_structure(src_file, dst_file):
+    """Extract worksheet structure without data"""
+    try:
+        # Read the worksheet XML
+        with open(src_file, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
+        
+        # Use regex to remove data cells but keep structure
+        # This pattern matches <c> tags (cells) that aren't defining structure
+        data_pattern = r'<c r="[^"]+">.*?</c>'
+        structure_only = re.sub(data_pattern, '', content)
+        
+        # Write the structure-only content
+        with open(dst_file, 'w', encoding='utf-8') as f:
+            f.write(structure_only)
+    except Exception as e:
+        print(f"Error processing worksheet {src_file}: {e}")
+        # Fallback: just copy the file as is
+        shutil.copy2(src_file, dst_file)
 
 def format_xml_files(directory):
     """Format XML files with attributes on separate lines for better diffing"""
     try:
-        import xml.dom.minidom as minidom
         xml_count = 0
         
         for root, _, files in os.walk(directory):
@@ -109,91 +179,6 @@ def format_xml_files(directory):
         print(f"Warning: XML formatting failed - {e}")
         print("Continuing without XML formatting...")
 
-def format_tag_manual(tag, indent_level):
-    """Manually format a tag with attributes on separate lines"""
-    # Skip processing for XML declaration, comments, etc.
-    if tag.startswith('<?') or tag.startswith('<!--'):
-        return '  ' * indent_level + tag
-    
-    # Simple tag with no attributes
-    if ' ' not in tag or (tag.startswith('</') and '=' not in tag):
-        return '  ' * indent_level + tag
-    
-    # Tag with attributes
-    # Extract tag name (everything before the first space)
-    first_space = tag.find(' ')
-    if first_space == -1:
-        return '  ' * indent_level + tag
-    
-    tag_name = tag[:first_space]
-    remainder = tag[first_space:]
-    
-    # Simple manual parsing of attributes
-    attributes = []
-    current_attr = ""
-    in_quotes = False
-    
-    for char in remainder:
-        current_attr += char
-        if char == '"':
-            in_quotes = not in_quotes
-        elif char == ' ' and not in_quotes and '=' in current_attr:
-            attributes.append(current_attr.strip())
-            current_attr = ""
-    
-    # Add the last attribute if any
-    if current_attr.strip():
-        if '/>' in current_attr:
-            # Handle self-closing tag specially
-            closing = current_attr[current_attr.rfind('/'):]
-            current_attr = current_attr[:current_attr.rfind('/')]
-            if current_attr.strip():
-                attributes.append(current_attr.strip())
-            attributes.append(closing)
-        else:
-            attributes.append(current_attr.strip())
-    
-    # Reconstruct the tag with formatted attributes
-    result = tag_name
-    indent = '  ' * (indent_level + 1)
-    
-    for attr in attributes:
-        if attr == '/>' or attr == '>':
-            result += '\n' + '  ' * indent_level + attr
-        else:
-            result += '\n' + indent + attr
-    
-    return '  ' * indent_level + result
-
-def package_xml_to_excel(xml_dir):
-    """Package XML directory back to Excel file"""
-    excel_path = Path(f"{xml_dir}.xlsx")
-    
-    # If excel already exists, create _overwritten backup
-    if excel_path.exists():
-        overwritten_path = excel_path.with_name(f"{excel_path.stem}_overwritten{excel_path.suffix}")
-        shutil.copy2(excel_path, overwritten_path)
-        print(f"Created backup at {overwritten_path}")
-    
-    # Create a temporary zip file
-    temp_zip = excel_path.with_suffix('.zip')
-    
-    with zipfile.ZipFile(temp_zip, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:
-        for root, _, files in os.walk(xml_dir):
-            for file in files:
-                file_path = os.path.join(root, file)
-                arcname = os.path.relpath(file_path, os.path.dirname(xml_dir))
-                zipf.write(file_path, arcname)
-    
-    # Rename zip to Excel
-    if temp_zip.exists():
-        if excel_path.exists():
-            excel_path.unlink()  # Remove existing Excel file
-        temp_zip.rename(excel_path)
-        print(f"Created Excel file at {excel_path}")
-    
-    return excel_path
-
 def get_changed_files():
     """Get list of changed files from the most recent commit"""
     repo = git.Repo('.')
@@ -211,7 +196,7 @@ def get_changed_files():
         return repo.git.ls_files().split('\n')
 
 def process_excel_files():
-    """Process Excel files and extract to XML"""
+    """Process Excel files and extract code and structure to XML"""
     # Get all changed files
     changed_files = get_changed_files()
     
@@ -222,6 +207,15 @@ def process_excel_files():
     if not excel_files:
         excel_files = glob.glob('**/*.xlsx', recursive=True) + glob.glob('**/*.xlsm', recursive=True)
     
+    # Create a directory for extracted files (not committed to Git)
+    extraction_dir = Path(".excel-extractions")
+    if extraction_dir.exists():
+        shutil.rmtree(extraction_dir)  # Clean up from previous runs
+    os.makedirs(extraction_dir, exist_ok=True)
+    
+    # Dictionary to track original file paths and their extraction directories
+    processed_files = {}
+    
     # Process each Excel file
     for excel_file in excel_files:
         # Skip any files that have _fromXML or _overwritten in their name
@@ -231,112 +225,121 @@ def process_excel_files():
         # Skip files that don't exist (may have been deleted)
         if not os.path.exists(excel_file):
             continue
-
+            
         # Skip files that are inside extracted directories
         if any(part.endswith('_fromXML') for part in Path(excel_file).parts):
             print(f"Skipping {excel_file} - inside extracted directory")
             continue
             
-        # Extract Excel to directory
-        extract_dir = extract_excel(excel_file)
+        # Check file size - skip very large files
+        file_size_mb = os.path.getsize(excel_file) / (1024 * 1024)
+        if file_size_mb > 90:
+            print(f"Skipping {excel_file} - size {file_size_mb:.2f}MB exceeds GitHub's limit")
+            continue
+            
+        # Extract only VBA and table structure to a temporary directory
+        safe_name = re.sub(r'[^\w\-\.]', '_', str(Path(excel_file).stem))
+        file_extraction_dir = extraction_dir / safe_name
+        extract_excel_selective(excel_file, file_extraction_dir)
         
         # Format XML files for better diffing
-        format_xml_files(extract_dir)
+        format_xml_files(file_extraction_dir)
         
-        # Add the extracted files to git
-        repo = git.Repo('.')
-        repo.git.add(str(extract_dir))
-        
-        # Create a _fromXML version for verification
-        fromxml_path = Path(excel_file).with_name(
-            f"{Path(excel_file).stem}_fromXML{Path(excel_file).suffix}"
-        )
-        shutil.copy2(excel_file, fromxml_path)
-        repo.git.add(str(fromxml_path))
+        # Track the mapping of original file to extraction directory
+        processed_files[excel_file] = file_extraction_dir
     
-    return excel_files
+    return processed_files
 
-def process_xml_files():
-    """Process XML files and package to Excel"""
-    # Get all changed files
-    changed_files = get_changed_files()
-    
-    # Find directories that contain XML changes
-    xml_dirs = set()
-    for changed_file in changed_files:
-        if changed_file.endswith('.xml') or '/xl/' in changed_file or '/_rels/' in changed_file:
-            # Find the directory containing Content_Types.xml or [Content_Types].xml
-            path = Path(changed_file)
-            current_dir = path.parent
-            
-            # Walk up the directory tree until we find the content types file
-            while str(current_dir) != '.':
-                # Check for both possible filenames (with and without brackets)
-                if (current_dir / 'Content_Types.xml').exists() or (current_dir / '[Content_Types].xml').exists():
-                    xml_dirs.add(str(current_dir))
-                    break
-                
-                if current_dir == Path('.') or current_dir.parent == current_dir:
-                    break  # Avoid infinite loop at root
-                
-                current_dir = current_dir.parent
-    
-    # Process each XML directory
-    for xml_dir in xml_dirs:
-        # Package XML directory to Excel
-        excel_path = package_xml_to_excel(xml_dir)
-        
-        # Add the new Excel file to git
-        repo = git.Repo('.')
-        repo.git.add(str(excel_path))
-        
-        # If we created an _overwritten backup, add that too
-        overwritten_path = excel_path.with_name(f"{excel_path.stem}_overwritten{excel_path.suffix}")
-        if overwritten_path.exists():
-            repo.git.add(str(overwritten_path))
-    
-    return list(xml_dirs)
-
-def generate_xml_diff_report(xml_dirs):
+def generate_xml_diff_report(processed_files):
     """Generate human-readable XML diff report with smart truncation"""
     try:
         reports_dir = Path("xml-diff-reports")
+        if reports_dir.exists():
+            shutil.rmtree(reports_dir)  # Clean up from previous runs
         os.makedirs(reports_dir, exist_ok=True)
+        
+        # Create an index file
+        index_file = reports_dir / "index.md"
+        with open(index_file, 'w') as f:
+            f.write("# Excel File Diff Reports\n\n")
+            f.write("| Excel File | VBA Changes | Table Structure Changes | Last Modified |\n")
+            f.write("|------------|-------------|-------------------------|---------------|\n")
+        
         repo = git.Repo('.')
         
-        for xml_dir in xml_dirs:
-            # Create summary and detailed reports
-            summary_file = reports_dir / f"{Path(xml_dir).name}-summary.md"
+        for original_file, extraction_dir in processed_files.items():
+            # Create summary report file
+            excel_name = Path(original_file).name
+            summary_file = reports_dir / f"{Path(extraction_dir).name}-summary.md"
             
+            # Track different types of changes
+            vba_changes = []
+            table_changes = []
+            structure_changes = []
+            
+            # Create the summary file
             with open(summary_file, 'w') as f:
-                f.write(f"# XML Changes Summary for {xml_dir}\n\n")
+                f.write(f"# Changes in {excel_name}\n\n")
+                
+                # Calculate file stats
+                try:
+                    file_stats = repo.git.log('-1', '--format=%ad', '--date=relative', '--', original_file)
+                except:
+                    file_stats = "Unknown"
+                
+                f.write(f"Last modified: {file_stats}\n\n")
                 
                 # Track total changes across all files
                 total_changes = 0
                 important_files = []
                 
                 # Process each XML file
-                for root, _, files in os.walk(xml_dir):
+                for root, _, files in os.walk(extraction_dir):
                     for file in files:
                         if file.endswith('.xml'):
                             file_path = os.path.join(root, file)
-                            rel_path = os.path.relpath(file_path, '.')
+                            rel_path = os.path.relpath(file_path, extraction_dir)
                             
                             try:
-                                # Get the diff
-                                diff = repo.git.diff('HEAD~1', file_path)
+                                # Get the diff - compare with previous commit's version
+                                # First, need to check if this is a new file
+                                is_new_file = True
+                                try:
+                                    # Check if the file path exists in the previous commit
+                                    is_new_file = False
+                                    diff = repo.git.diff('HEAD', file_path)
+                                except:
+                                    # If error, it's likely a new file
+                                    is_new_file = True
                                 
-                                # Skip files with no changes
-                                if not diff:
-                                    continue
+                                if is_new_file:
+                                    # For new files, just count the lines
+                                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as content_file:
+                                        content = content_file.read()
+                                        changes = content.count('\n')
+                                        diff = content
+                                else:
+                                    # Not a new file, get diff
+                                    diff = repo.git.diff('HEAD', file_path)
+                                    # Skip files with no changes
+                                    if not diff:
+                                        continue
                                     
-                                # Count added/removed lines
-                                added = diff.count('\n+')
-                                removed = diff.count('\n-')
-                                changes = added + removed
+                                    # Count added/removed lines
+                                    added = diff.count('\n+')
+                                    removed = diff.count('\n-')
+                                    changes = added + removed
                                 
                                 if changes > 0:
                                     total_changes += changes
+                                    
+                                    # Record changes by type
+                                    if 'vba' in rel_path.lower():
+                                        vba_changes.append((rel_path, changes))
+                                    elif 'tables' in rel_path.lower():
+                                        table_changes.append((rel_path, changes))
+                                    else:
+                                        structure_changes.append((rel_path, changes))
                                     
                                     # Record important files (those with significant changes)
                                     importance = "HIGH" if changes > 10 else "MEDIUM" if changes > 3 else "LOW"
@@ -344,27 +347,48 @@ def generate_xml_diff_report(xml_dirs):
                             except Exception as e:
                                 f.write(f"Error analyzing {rel_path}: {e}\n\n")
                 
-                # Write summary
+                # Write summary sections
                 f.write(f"**Total changes:** {total_changes} lines modified\n\n")
-                f.write("## Modified Files\n\n")
-                f.write("| File | Changes | Importance |\n")
-                f.write("|------|---------|------------|\n")
                 
-                for file_path, changes, importance in sorted(important_files, key=lambda x: x[1], reverse=True):
-                    f.write(f"| {file_path} | {changes} | {importance} |\n")
+                # VBA Changes
+                if vba_changes:
+                    f.write("## VBA Code Changes\n\n")
+                    f.write("| File | Changes |\n")
+                    f.write("|------|--------|\n")
+                    for file_path, changes in sorted(vba_changes, key=lambda x: x[1], reverse=True):
+                        f.write(f"| {file_path} | {changes} |\n")
+                    f.write("\n")
                 
-                f.write("\n## Details\n\n")
-                f.write("For detailed changes in specific files, see subdirectories in this report.\n")
+                # Table Changes
+                if table_changes:
+                    f.write("## Table Structure Changes\n\n")
+                    f.write("| Table | Changes |\n")
+                    f.write("|-------|--------|\n")
+                    for file_path, changes in sorted(table_changes, key=lambda x: x[1], reverse=True):
+                        f.write(f"| {file_path} | {changes} |\n")
+                    f.write("\n")
+                
+                # Other Structure Changes
+                if structure_changes:
+                    f.write("## Other Structure Changes\n\n")
+                    f.write("| File | Changes |\n")
+                    f.write("|------|--------|\n")
+                    for file_path, changes in sorted(structure_changes, key=lambda x: x[1], reverse=True):
+                        f.write(f"| {file_path} | {changes} |\n")
+                    f.write("\n")
+                
+                f.write("## Details\n\n")
+                f.write("For detailed changes in specific files, see the detailed reports below.\n")
             
             # Create detailed reports directory 
-            details_dir = reports_dir / f"{Path(xml_dir).name}-details"
+            details_dir = reports_dir / f"{Path(extraction_dir).name}-details"
             os.makedirs(details_dir, exist_ok=True)
             
             # Process most important files first
-            for file_path, changes, _ in sorted(important_files, key=lambda x: x[1], reverse=True)[:10]:
+            for file_path, changes, _ in sorted(important_files, key=lambda x: x[1], reverse=True)[:20]:
                 try:
                     # Get the full file path
-                    full_path = os.path.join('.', file_path)
+                    full_path = os.path.join(extraction_dir, file_path)
                     
                     # Skip very large files
                     file_size_mb = os.path.getsize(full_path) / (1024 * 1024)
@@ -373,13 +397,18 @@ def generate_xml_diff_report(xml_dirs):
                         continue
                     
                     # Create detail file
-                    detail_file = details_dir / f"{Path(file_path).name}-diff.md"
+                    detail_file = details_dir / f"{Path(file_path).name.replace('.', '_')}-diff.md"
                     
                     with open(detail_file, 'w') as f:
                         f.write(f"# Changes in {file_path}\n\n")
                         
                         # Get diff
-                        diff = repo.git.diff('HEAD~1', full_path)
+                        try:
+                            diff = repo.git.diff('HEAD', full_path)
+                        except:
+                            # If error, it's likely a new file - show the whole content
+                            with open(full_path, 'r', encoding='utf-8', errors='ignore') as content_file:
+                                diff = content_file.read()
                         
                         # Limit diff size (GitHub's recommended file size)
                         if len(diff) > 40 * 1024 * 1024:  # 40MB
@@ -395,71 +424,33 @@ def generate_xml_diff_report(xml_dirs):
                 except Exception as e:
                     print(f"Error creating detail report for {file_path}: {e}")
             
-            print(f"Created XML diff reports for {xml_dir}")
+            # Update the index file
+            with open(index_file, 'a') as f:
+                vba_count = len(vba_changes)
+                table_count = len(table_changes)
+                f.write(f"| [{excel_name}]({Path(extraction_dir).name}-summary.md) | {vba_count} | {table_count} | {file_stats} |\n")
+            
+            print(f"Created XML diff reports for {original_file}")
         
-        # No need to add reports to git since they're uploaded as artifacts
         return reports_dir
     except Exception as e:
         print(f"Warning: Failed to generate XML diff report - {e}")
         return None
 
-def commit_changes():
-    """Commit any changes and push to repository"""
-    repo = git.Repo('.')
-    
-    if repo.is_dirty() or len(repo.untracked_files) > 0:
-        try:
-            token = os.environ.get('GITHUB_TOKEN')
-            
-            # Construct the correct remote URL with token
-            origin_url = repo.remotes.origin.url
-            if origin_url.startswith('https://'):
-                # Format: https://x-access-token:TOKEN@github.com/user/repo.git
-                new_url = f"https://x-access-token:{token}@github.com/{'/'.join(origin_url.split('/')[3:])}"
-                repo.remotes.origin.set_url(new_url)
-            
-            # Get branch name from GITHUB_REF environment variable
-            branch = os.environ.get('GITHUB_REF', 'refs/heads/main').replace('refs/heads/', '')
-            
-            # First pull to prevent non-fast-forward errors
-            try:
-                repo.git.pull('--rebase', 'origin', branch)
-            except git.exc.GitCommandError as e:
-                print(f"Pull error (non-critical): {e}")
-            
-            # Commit changes
-            repo.git.add(A=True)  # Add all changes
-            commit_msg = "Excel-XML Conversion [skip ci]"
-            repo.git.commit('-m', commit_msg)
-            
-            # Push changes
-            repo.git.push('origin', branch)
-            print(f"Changes committed and pushed to {branch}")
-            
-        except git.exc.GitCommandError as e:
-            print(f"Git push error: {e}")
-            print("Continuing with conversion...")
-
 def main():
     """Main function to process files"""
     print("Starting Excel-XML conversion...")
     
-    # Process Excel files (extract to XML)
-    excel_files = process_excel_files()
-    print(f"Processed {len(excel_files)} Excel files")
+    # Process Excel files (extract to XML but don't commit)
+    processed_files = process_excel_files()
+    print(f"Processed {len(processed_files)} Excel files")
     
-    # Process XML files (package to Excel)
-    xml_dirs = process_xml_files()
-    print(f"Processed {len(xml_dirs)} XML directories")
+    # Generate XML diff reports
+    if processed_files:
+        generate_xml_diff_report(processed_files)
     
-    # Generate XML diff report (now as artifacts, not committed to repo)
-    if xml_dirs:
-        generate_xml_diff_report(xml_dirs)
-    
-    # Commit and push changes
-    commit_changes()
-    
-    print("Excel-XML conversion completed")
+    # No need to commit any changes - reports are uploaded as artifacts only
+    print("Excel-XML conversion completed. Diff reports created as artifacts.")
 
 if __name__ == "__main__":
     main()
