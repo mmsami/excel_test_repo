@@ -1,11 +1,11 @@
-# Changes in 20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/xl/tables/table1.xml
+# Changes in 20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/xl/tables/table1.xml
 
 ```diff
-diff --git a/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/xl/tables/table1.xml b/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/xl/tables/table1.xml
+diff --git a/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/xl/tables/table1.xml b/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/xl/tables/table1.xml
 new file mode 100644
 index 0000000..9523ccf
 --- /dev/null
-+++ b/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/xl/tables/table1.xml
++++ b/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/xl/tables/table1.xml
 @@ -0,0 +1,5 @@
 +<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 +<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="4" xr:uid="{1F77138D-58F8-4128-8A2F-311DB6BF673F}" name="catalog_GlossaryClassifiers" displayName="catalog_GlossaryClassifiers" ref="A1:L1451" totalsRowShown="0" headerRowDxfId="102" headerRowBorderDxfId="101"><autoFilter ref="A1:L1451" xr:uid="{1F77138D-58F8-4128-8A2F-311DB6BF673F}"/><sortState ref="A2:L1451" xmlns:xlrd2="http://schemas.microsoft.com/office/spreadsheetml/2017/richdata2"><sortCondition ref="B1:B1451"/></sortState><tableColumns count="12"><tableColumn id="1" xr3:uid="{484D8321-6EC5-4944-B5BF-F695A64740B1}" name="ID" dataDxfId="100"/><tableColumn id="3" xr3:uid="{06E91A25-042F-461D-92FE-4D66F0CC4AC8}" name="Package" dataDxfId="99"/><tableColumn id="15" xr3:uid="{589C0529-1979-43A1-BB96-B422FFDF1C4A}" name="Original Iso20022 Type" dataDxfId="98"/><tableColumn id="22" xr3:uid="{0A430EB9-7574-42C5-BB5C-356E938696FE}" name="Iso 20022 Type" dataDxfId="97"><calculatedColumnFormula>IF(catalog_GlossaryClassifiers[[#This Row],[Kind]]="Class","iso20022:BusinessComponent",
