@@ -231,6 +231,11 @@ def process_excel_files():
         # Skip files that don't exist (may have been deleted)
         if not os.path.exists(excel_file):
             continue
+
+        # Skip files that are inside extracted directories
+        if any(part.endswith('_fromXML') for part in Path(excel_file).parts):
+            print(f"Skipping {excel_file} - inside extracted directory")
+            continue
             
         # Extract Excel to directory
         extract_dir = extract_excel(excel_file)
@@ -415,6 +420,12 @@ def commit_changes():
             
             # Get branch name from GITHUB_REF environment variable
             branch = os.environ.get('GITHUB_REF', 'refs/heads/main').replace('refs/heads/', '')
+            
+            # First pull to prevent non-fast-forward errors
+            try:
+                repo.git.pull('--rebase', 'origin', branch)
+            except git.exc.GitCommandError as e:
+                print(f"Pull error (non-critical): {e}")
             
             # Commit changes
             repo.git.add(A=True)  # Add all changes
