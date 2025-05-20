@@ -30,6 +30,7 @@ def extract_excel(excel_path):
 def format_xml_files(directory):
     """Format XML files with attributes on separate lines for better diffing"""
     try:
+        import xml.dom.minidom as minidom
         xml_count = 0
         
         for root, _, files in os.walk(directory):
@@ -37,54 +38,67 @@ def format_xml_files(directory):
                 if file.endswith('.xml'):
                     file_path = os.path.join(root, file)
                     try:
-                        # Read the file
+                        # Use a simple string replacement approach which is faster
                         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                             content = f.read()
                         
-                        # Use a simplified approach without regex for greater robustness
-                        formatted_lines = []
-                        in_tag = False
-                        tag_buffer = ""
+                        # Process opening tags with regex - more efficient than char-by-char
+                        import re
+                        
+                        # This pattern finds opening tags with attributes
+                        pattern = r'<([a-zA-Z0-9_:-]+)(\s+[^>]+)>'
+                        
+                        def format_attributes(match):
+                            tag_name = match.group(1)
+                            attributes = match.group(2).strip()
+                            
+                            # If no attributes or very simple, return as is
+                            if not attributes or ' ' not in attributes:
+                                return f"<{tag_name} {attributes}>"
+                            
+                            # Add line breaks between attributes
+                            formatted_attrs = ""
+                            attr_indent = "  "
+                            
+                            # Match each attribute
+                            attr_pattern = r'([a-zA-Z0-9_:-]+)="([^"]*)"'
+                            attr_matches = re.findall(attr_pattern, attributes)
+                            
+                            for attr_name, attr_value in attr_matches:
+                                formatted_attrs += f"\n{attr_indent}{attr_name}=\"{attr_value}\""
+                            
+                            return f"<{tag_name}{formatted_attrs}\n>"
+                        
+                        # Apply the formatting to opening tags
+                        formatted_content = re.sub(pattern, format_attributes, content)
+                        
+                        # Add indentation to make it more readable
+                        lines = formatted_content.split('\n')
+                        indented_lines = []
                         indent_level = 0
                         
-                        for char in content:
-                            # Starting a new tag
-                            if char == '<':
-                                in_tag = True
-                                if tag_buffer:  # Flush any existing text
-                                    formatted_lines.append('  ' * indent_level + tag_buffer)
-                                tag_buffer = '<'
-                            # Ending a tag
-                            elif char == '>' and in_tag:
-                                in_tag = False
-                                tag_buffer += '>'
+                        for line in lines:
+                            stripped = line.strip()
+                            
+                            # Adjust indent for closing tags
+                            if stripped.startswith('</'):
+                                indent_level = max(0, indent_level - 1)
                                 
-                                # Format the tag's attributes
-                                tag = tag_buffer
-                                formatted_tag = format_tag_manual(tag, indent_level)
-                                formatted_lines.append(formatted_tag)
-                                
-                                # Adjust indent level for next elements
-                                if not tag.startswith('</') and not tag.endswith('/>') and not tag.startswith('<?'):
-                                    indent_level += 1
-                                if tag.startswith('</'):
-                                    indent_level = max(0, indent_level - 1)
-                                
-                                tag_buffer = ""
-                            # Add to the current buffer
-                            elif in_tag:
-                                tag_buffer += char
-                            else:
-                                tag_buffer += char
-                        
-                        # Any remaining content
-                        if tag_buffer:
-                            formatted_lines.append('  ' * indent_level + tag_buffer)
+                            # Add the indented line if it's not empty
+                            if stripped:
+                                # Don't re-indent lines that are already indented attributes
+                                if '=' in stripped and not stripped.startswith('<'):
+                                    indented_lines.append(line)  # Keep original indentation
+                                else:
+                                    indented_lines.append('  ' * indent_level + stripped)
+                            
+                            # Increase indent after opening tag
+                            if stripped.startswith('<') and not stripped.startswith('</') and not stripped.endswith('/>') and not stripped.startswith('<?'):
+                                indent_level += 1
                         
                         # Write the formatted content back
-                        formatted_content = '\n'.join(formatted_lines)
                         with open(file_path, 'w', encoding='utf-8') as f:
-                            f.write(formatted_content)
+                            f.write('\n'.join(indented_lines))
                         
                         xml_count += 1
                     except Exception as e:
