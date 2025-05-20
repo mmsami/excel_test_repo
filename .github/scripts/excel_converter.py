@@ -29,22 +29,46 @@ def extract_excel(excel_path):
 
 def format_xml_tag(tag):
     """Format an XML tag with attributes on separate lines"""
+    import re
+    
     # Don't add new lines for self-closing tags with no attributes
     if '/>' in tag and not ' ' in tag:
         return tag
     
     # If there are attributes, format them
     if ' ' in tag and not tag.strip().startswith('<?xml'):
-        parts = re.split(r'(\s+(?:[a-zA-Z0-9_\-:]+)="[^"]*")', tag)
+        # Use a different approach to split the tag and attributes
+        tag_parts = tag.strip()
+        
+        # Get the tag name (everything up to the first space)
+        tag_name_end = tag_parts.find(' ')
+        if tag_name_end == -1:
+            return tag  # No attributes found
+            
+        tag_name = tag_parts[:tag_name_end]
+        attributes_part = tag_parts[tag_name_end:]
+        
+        # Find all attributes using regex
+        attr_pattern = re.compile(r'\s+([a-zA-Z0-9_\-:]+)="([^"]*)"')
+        attr_matches = attr_pattern.findall(attributes_part)
+        
+        if not attr_matches:
+            return tag  # No attributes found using regex
+            
+        # Start with the tag name
+        result = tag_name
         indent = '  '
         
-        result = parts[0]  # Opening part of tag
-        for i, part in enumerate(parts[1:]):
-            if '=' in part:  # This is an attribute
-                result += "\n" + indent + part.strip()
-            else:
-                result += part
-        
+        # Add each attribute on a new line
+        for attr_name, attr_value in attr_matches:
+            result += f"\n{indent}{attr_name}=\"{attr_value}\""
+            
+        # Add closing bracket
+        if tag_parts.endswith('/>'):
+            result += "\n/>"
+        else:
+            result += "\n>"
+            
         return result
     return tag
 
