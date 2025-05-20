@@ -27,51 +27,6 @@ def extract_excel(excel_path):
     print(f"Extracted {excel_path} to {excel_dir}/")
     return excel_dir
 
-def format_xml_tag(tag):
-    """Format an XML tag with attributes on separate lines"""
-    import re
-    
-    # Don't add new lines for self-closing tags with no attributes
-    if '/>' in tag and not ' ' in tag:
-        return tag
-    
-    # If there are attributes, format them
-    if ' ' in tag and not tag.strip().startswith('<?xml'):
-        # Use a different approach to split the tag and attributes
-        tag_parts = tag.strip()
-        
-        # Get the tag name (everything up to the first space)
-        tag_name_end = tag_parts.find(' ')
-        if tag_name_end == -1:
-            return tag  # No attributes found
-            
-        tag_name = tag_parts[:tag_name_end]
-        attributes_part = tag_parts[tag_name_end:]
-        
-        # Find all attributes using regex
-        attr_pattern = re.compile(r'\s+([a-zA-Z0-9_\-:]+)="([^"]*)"')
-        attr_matches = attr_pattern.findall(attributes_part)
-        
-        if not attr_matches:
-            return tag  # No attributes found using regex
-            
-        # Start with the tag name
-        result = tag_name
-        indent = '  '
-        
-        # Add each attribute on a new line
-        for attr_name, attr_value in attr_matches:
-            result += f"\n{indent}{attr_name}=\"{attr_value}\""
-            
-        # Add closing bracket
-        if tag_parts.endswith('/>'):
-            result += "\n/>"
-        else:
-            result += "\n>"
-            
-        return result
-    return tag
-
 def format_xml_files(directory):
     """Format XML files with attributes on separate lines for better diffing"""
     try:
@@ -86,41 +41,48 @@ def format_xml_files(directory):
                         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                             content = f.read()
                         
-                        # Custom formatting - indent and put attributes on new lines
-                        
-                        # First, normalize line endings
-                        content = content.replace("\r\n", "\n")
-                        
-                        # Apply formatting to opening tags with attributes
-                        formatted = re.sub(r'<[^>]+>', format_xml_tag, content)
-                        
-                        # Add proper indentation
-                        lines = formatted.split('\n')
+                        # Use a simplified approach without regex for greater robustness
+                        formatted_lines = []
+                        in_tag = False
+                        tag_buffer = ""
                         indent_level = 0
-                        result_lines = []
                         
-                        for line in lines:
-                            stripped = line.strip()
-                            
-                            # Decrease indent for closing tags
-                            if stripped.startswith('</'):
-                                indent_level = max(0, indent_level - 1)
-                            
-                            # Add the line with proper indentation
-                            if stripped:  # Skip empty lines
-                                if '=' in stripped and not stripped.startswith('<'):
-                                    # This is an attribute line, already indented
-                                    result_lines.append(line)
-                                else:
-                                    result_lines.append('  ' * indent_level + stripped)
-                            
-                            # Increase indent after opening tag
-                            if stripped.startswith('<') and not stripped.startswith('</') and not stripped.endswith('/>') and not stripped.startswith('<?'):
-                                indent_level += 1
+                        for char in content:
+                            # Starting a new tag
+                            if char == '<':
+                                in_tag = True
+                                if tag_buffer:  # Flush any existing text
+                                    formatted_lines.append('  ' * indent_level + tag_buffer)
+                                tag_buffer = '<'
+                            # Ending a tag
+                            elif char == '>' and in_tag:
+                                in_tag = False
+                                tag_buffer += '>'
+                                
+                                # Format the tag's attributes
+                                tag = tag_buffer
+                                formatted_tag = format_tag_manual(tag, indent_level)
+                                formatted_lines.append(formatted_tag)
+                                
+                                # Adjust indent level for next elements
+                                if not tag.startswith('</') and not tag.endswith('/>') and not tag.startswith('<?'):
+                                    indent_level += 1
+                                if tag.startswith('</'):
+                                    indent_level = max(0, indent_level - 1)
+                                
+                                tag_buffer = ""
+                            # Add to the current buffer
+                            elif in_tag:
+                                tag_buffer += char
+                            else:
+                                tag_buffer += char
                         
-                        formatted_content = '\n'.join(result_lines)
+                        # Any remaining content
+                        if tag_buffer:
+                            formatted_lines.append('  ' * indent_level + tag_buffer)
                         
                         # Write the formatted content back
+                        formatted_content = '\n'.join(formatted_lines)
                         with open(file_path, 'w', encoding='utf-8') as f:
                             f.write(formatted_content)
                         
@@ -132,6 +94,62 @@ def format_xml_files(directory):
     except Exception as e:
         print(f"Warning: XML formatting failed - {e}")
         print("Continuing without XML formatting...")
+
+def format_tag_manual(tag, indent_level):
+    """Manually format a tag with attributes on separate lines"""
+    # Skip processing for XML declaration, comments, etc.
+    if tag.startswith('<?') or tag.startswith('<!--'):
+        return '  ' * indent_level + tag
+    
+    # Simple tag with no attributes
+    if ' ' not in tag or (tag.startswith('</') and '=' not in tag):
+        return '  ' * indent_level + tag
+    
+    # Tag with attributes
+    # Extract tag name (everything before the first space)
+    first_space = tag.find(' ')
+    if first_space == -1:
+        return '  ' * indent_level + tag
+    
+    tag_name = tag[:first_space]
+    remainder = tag[first_space:]
+    
+    # Simple manual parsing of attributes
+    attributes = []
+    current_attr = ""
+    in_quotes = False
+    
+    for char in remainder:
+        current_attr += char
+        if char == '"':
+            in_quotes = not in_quotes
+        elif char == ' ' and not in_quotes and '=' in current_attr:
+            attributes.append(current_attr.strip())
+            current_attr = ""
+    
+    # Add the last attribute if any
+    if current_attr.strip():
+        if '/>' in current_attr:
+            # Handle self-closing tag specially
+            closing = current_attr[current_attr.rfind('/'):]
+            current_attr = current_attr[:current_attr.rfind('/')]
+            if current_attr.strip():
+                attributes.append(current_attr.strip())
+            attributes.append(closing)
+        else:
+            attributes.append(current_attr.strip())
+    
+    # Reconstruct the tag with formatted attributes
+    result = tag_name
+    indent = '  ' * (indent_level + 1)
+    
+    for attr in attributes:
+        if attr == '/>' or attr == '>':
+            result += '\n' + '  ' * indent_level + attr
+        else:
+            result += '\n' + indent + attr
+    
+    return '  ' * indent_level + result
 
 def package_xml_to_excel(xml_dir):
     """Package XML directory back to Excel file"""
