@@ -1,0 +1,14 @@
+# Changes in Book100_v10_RETEST_withV41ReferenceManagement_intraRefWithListener/docProps/core.xml
+
+```diff
+diff --git a/Book100_v10_RETEST_withV41ReferenceManagement_intraRefWithListener/docProps/core.xml b/Book100_v10_RETEST_withV41ReferenceManagement_intraRefWithListener/docProps/core.xml
+index b687ed0..dda79ab 100644
+--- a/Book100_v10_RETEST_withV41ReferenceManagement_intraRefWithListener/docProps/core.xml
++++ b/Book100_v10_RETEST_withV41ReferenceManagement_intraRefWithListener/docProps/core.xml
+@@ -1,2 +1,2 @@
+ <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+-<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:creator>Philipp W. Kutter</dc:creator><cp:lastModifiedBy>Philipp W. Kutter</cp:lastModifiedBy><dcterms:created xsi:type="dcterms:W3CDTF">2025-04-08T20:26:03Z</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">2025-05-18T11:13:09Z</dcterms:modified></cp:coreProperties>
+\ No newline at end of file
++<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:creator>Philipp W. Kutter</dc:creator><cp:lastModifiedBy>Philipp W. Kutter</cp:lastModifiedBy><dcterms:created xsi:type="dcterms:W3CDTF">2025-04-08T20:26:03Z</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">2025-05-20T05:06:18Z</dcterms:modified></cp:coreProperties>
+\ No newline at end of file
+```
