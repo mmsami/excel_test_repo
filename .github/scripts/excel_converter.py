@@ -10,6 +10,7 @@ import shutil
 import zipfile
 import glob
 import git
+import re
 from pathlib import Path
 
 def extract_excel(excel_path):
@@ -26,6 +27,27 @@ def extract_excel(excel_path):
     print(f"Extracted {excel_path} to {excel_dir}/")
     return excel_dir
 
+def format_xml_tag(tag):
+    """Format an XML tag with attributes on separate lines"""
+    # Don't add new lines for self-closing tags with no attributes
+    if '/>' in tag and not ' ' in tag:
+        return tag
+    
+    # If there are attributes, format them
+    if ' ' in tag and not tag.strip().startswith('<?xml'):
+        parts = re.split(r'(\s+(?:[a-zA-Z0-9_\-:]+)="[^"]*")', tag)
+        indent = '  '
+        
+        result = parts[0]  # Opening part of tag
+        for i, part in enumerate(parts[1:]):
+            if '=' in part:  # This is an attribute
+                result += "\n" + indent + part.strip()
+            else:
+                result += part
+        
+        return result
+    return tag
+
 def format_xml_files(directory):
     """Format XML files with attributes on separate lines for better diffing"""
     try:
@@ -41,35 +63,12 @@ def format_xml_files(directory):
                             content = f.read()
                         
                         # Custom formatting - indent and put attributes on new lines
-                        import re
                         
                         # First, normalize line endings
                         content = content.replace("\r\n", "\n")
                         
-                        # Function to format an XML tag with attributes
-                        def format_tag(match):
-                            tag = match.group(0)
-                            # Don't add new lines for self-closing tags with no attributes
-                            if '/>' in tag and not ' ' in tag:
-                                return tag
-                            
-                            # If there are attributes, format them
-                            if ' ' in tag and not tag.strip().startswith('<?xml'):
-                                parts = re.split(r'(\s+(?:[a-zA-Z0-9_\-:]+)="[^"]*")', tag)
-                                indent = '  '
-                                
-                                result = parts[0]  # Opening part of tag
-                                for i, part in enumerate(parts[1:]):
-                                    if '=' in part:  # This is an attribute
-                                        result += "\n" + indent + part.strip()
-                                    else:
-                                        result += part
-                                
-                                return result
-                            return tag
-                        
                         # Apply formatting to opening tags with attributes
-                        formatted = re.sub(r'<[^>]+>', format_tag, content)
+                        formatted = re.sub(r'<[^>]+>', format_xml_tag, content)
                         
                         # Add proper indentation
                         lines = formatted.split('\n')
@@ -306,6 +305,12 @@ def generate_xml_diff_report(xml_dirs):
                     # Get the full file path
                     full_path = os.path.join('.', file_path)
                     
+                    # Skip very large files
+                    file_size_mb = os.path.getsize(full_path) / (1024 * 1024)
+                    if file_size_mb > 40:
+                        print(f"Skipping detailed diff for {file_path} - size {file_size_mb:.2f}MB exceeds size limits")
+                        continue
+                    
                     # Create detail file
                     detail_file = details_dir / f"{Path(file_path).name}-diff.md"
                     
@@ -315,8 +320,13 @@ def generate_xml_diff_report(xml_dirs):
                         # Get diff
                         diff = repo.git.diff('HEAD~1', full_path)
                         
+                        # Limit diff size (GitHub's recommended file size)
+                        if len(diff) > 40 * 1024 * 1024:  # 40MB
+                            truncated_diff = diff[:40 * 1024 * 1024] + "\n\n... (truncated due to size limits) ...\n"
+                            diff = truncated_diff
+                        
                         # Process diff for readability
-                        processed_diff = diff.replace('&amp;', '[&]').replace('&lt;', '[<]').replace('&gt;', '[>]')
+                        processed_diff = diff.replace('&amp;', '[&]').replace('&lt;', '[<]').replace('&gt;', '[>]').replace('&quot;', '["]')
                         
                         f.write("```diff\n")
                         f.write(processed_diff)
@@ -326,9 +336,7 @@ def generate_xml_diff_report(xml_dirs):
             
             print(f"Created XML diff reports for {xml_dir}")
         
-        # Add the reports to git
-        repo.git.add(str(reports_dir))
-        
+        # No need to add reports to git since they're uploaded as artifacts
         return reports_dir
     except Exception as e:
         print(f"Warning: Failed to generate XML diff report - {e}")
@@ -377,7 +385,7 @@ def main():
     xml_dirs = process_xml_files()
     print(f"Processed {len(xml_dirs)} XML directories")
     
-    # Generate XML diff report
+    # Generate XML diff report (now as artifacts, not committed to repo)
     if xml_dirs:
         generate_xml_diff_report(xml_dirs)
     
