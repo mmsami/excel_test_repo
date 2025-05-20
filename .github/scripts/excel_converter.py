@@ -27,39 +27,85 @@ def extract_excel(excel_path):
     return excel_dir
 
 def format_xml_files(directory):
-    """Format XML files for better diffing"""
+    """Format XML files with attributes on separate lines for better diffing"""
     try:
-        # Try to import xmlformatter, install if not available
-        try:
-            from xmlformatter import Formatter
-        except ImportError:
-            import subprocess
-            print("Installing xmlformatter...")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "xmlformatter"])
-            from xmlformatter import Formatter
-        
-        # Use only supported parameters
-        formatter = Formatter(indent="  ")
-        
         xml_count = 0
+        
         for root, _, files in os.walk(directory):
             for file in files:
                 if file.endswith('.xml'):
                     file_path = os.path.join(root, file)
                     try:
-                        with open(file_path, 'rb') as f:
+                        # Read the file
+                        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                             content = f.read()
                         
-                        formatted_content = formatter.format_string(content)
+                        # Custom formatting - indent and put attributes on new lines
+                        import re
                         
-                        with open(file_path, 'wb') as f:
-                            f.write(formatted_content)
+                        # First, normalize line endings
+                        content = content.replace("\r\n", "\n")
+                        
+                        # Function to format an XML tag with attributes
+                        def format_tag(match):
+                            tag = match.group(0)
+                            # Don't add new lines for self-closing tags with no attributes
+                            if '/>' in tag and not ' ' in tag:
+                                return tag
                             
+                            # If there are attributes, format them
+                            if ' ' in tag and not tag.strip().startswith('<?xml'):
+                                parts = re.split(r'(\s+(?:[a-zA-Z0-9_\-:]+)="[^"]*")', tag)
+                                indent = '  '
+                                
+                                result = parts[0]  # Opening part of tag
+                                for i, part in enumerate(parts[1:]):
+                                    if '=' in part:  # This is an attribute
+                                        result += "\n" + indent + part.strip()
+                                    else:
+                                        result += part
+                                
+                                return result
+                            return tag
+                        
+                        # Apply formatting to opening tags with attributes
+                        formatted = re.sub(r'<[^>]+>', format_tag, content)
+                        
+                        # Add proper indentation
+                        lines = formatted.split('\n')
+                        indent_level = 0
+                        result_lines = []
+                        
+                        for line in lines:
+                            stripped = line.strip()
+                            
+                            # Decrease indent for closing tags
+                            if stripped.startswith('</'):
+                                indent_level = max(0, indent_level - 1)
+                            
+                            # Add the line with proper indentation
+                            if stripped:  # Skip empty lines
+                                if '=' in stripped and not stripped.startswith('<'):
+                                    # This is an attribute line, already indented
+                                    result_lines.append(line)
+                                else:
+                                    result_lines.append('  ' * indent_level + stripped)
+                            
+                            # Increase indent after opening tag
+                            if stripped.startswith('<') and not stripped.startswith('</') and not stripped.endswith('/>') and not stripped.startswith('<?'):
+                                indent_level += 1
+                        
+                        formatted_content = '\n'.join(result_lines)
+                        
+                        # Write the formatted content back
+                        with open(file_path, 'w', encoding='utf-8') as f:
+                            f.write(formatted_content)
+                        
                         xml_count += 1
                     except Exception as e:
                         print(f"Error formatting {file_path}: {e}")
         
-        print(f"Formatted {xml_count} XML files in {directory}")
+        print(f"Formatted {xml_count} XML files in {directory} with attributes on separate lines")
     except Exception as e:
         print(f"Warning: XML formatting failed - {e}")
         print("Continuing without XML formatting...")
