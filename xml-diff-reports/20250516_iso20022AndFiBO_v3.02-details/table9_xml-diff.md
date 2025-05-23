@@ -1,0 +1,78 @@
+# Changes in 20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/xl/tables/table9.xml
+
+```diff
+diff --git a/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/xl/tables/table9.xml b/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/xl/tables/table9.xml
+index ad887fe..ec8359d 100644
+--- a/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/xl/tables/table9.xml
++++ b/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/20250516_iso20022AndFiBO_v3.02/xl/tables/table9.xml
+@@ -1,2 +1,65 @@
+-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+-<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="7" xr:uid="{72621B3B-2F52-5A44-995F-8C35CD12E32A}" name="BusinessModelTable_fromISO20022" displayName="BusinessModelTable_fromISO20022" ref="A1:H5351" totalsRowShown="0" headerRowDxfId="10" dataDxfId="9"><autoFilter ref="A1:H5351" xr:uid="{558D4643-7E57-4CB3-92F0-A12DE0AB4F10}"/><tableColumns count="8"><tableColumn id="8" xr3:uid="{58D3D127-F5DF-4734-8DDC-0D65F8D7C9D7}" name="Original Order" dataDxfId="8"/><tableColumn id="7" xr3:uid="{ADC15855-755F-49B3-AF1A-8AF4799CFAF2}" name="Biz ID" dataDxfId="7"><calculatedColumnFormula>BusinessModelTable_fromISO20022[[#This Row],[Business Component Name]][&]IF(BusinessModelTable_fromISO20022[[#This Row],[Business Element Name]]="","","."[&]BusinessModelTable_fromISO20022[[#This Row],[Business Element Name]])</calculatedColumnFormula></tableColumn><tableColumn id="1" xr3:uid="{1B07F6A5-D927-934C-98D2-AD73EB0B6DC5}" name="Business Component Name" dataDxfId="6"/><tableColumn id="2" xr3:uid="{A68FA9AF-4D0B-0C42-AC15-ABDDD9972617}" name="Business Element Name" dataDxfId="5"/><tableColumn id="3" xr3:uid="{E641B39D-77CF-0845-A71B-2C771AAF0C72}" name="Business Component Parent Name" dataDxfId="4"/><tableColumn id="4" xr3:uid="{60F5786E-13DC-E045-A1F3-541010D473C8}" name="Documentation" dataDxfId="3"/><tableColumn id="5" xr3:uid="{4D2D7891-D561-6149-8890-6DC8686B9FD8}" name="Business Element Type Name" dataDxfId="2"/><tableColumn id="6" xr3:uid="{D7FE5C6A-2C97-4F4B-B3DB-CD66650810D6}" name="Name of Opposite End" dataDxfId="1"/></tableColumns><tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>
+\ No newline at end of file
++<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
++<table
++  xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
++  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
++  mc:Ignorable="xr xr3"
++  xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
++  xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3"
++  id="7"
++  xr:uid="{72621B3B-2F52-5A44-995F-8C35CD12E32A}"
++  name="BusinessModelTable_fromISO20022"
++  displayName="BusinessModelTable_fromISO20022"
++  ref="A1:H5351"
++  totalsRowShown="0"
++  headerRowDxfId="10"
++  dataDxfId="9"
++  ><autoFilter
++  ref="A1:H5351"
++  xr:uid="{558D4643-7E57-4CB3-92F0-A12DE0AB4F10}"
++><tableColumns count="8"><tableColumn
++  id="8"
++  xr3:uid="{58D3D127-F5DF-4734-8DDC-0D65F8D7C9D7}"
++  name="Original Order"
++  dataDxfId="8"
++  ><tableColumn
++  id="7"
++  xr3:uid="{ADC15855-755F-49B3-AF1A-8AF4799CFAF2}"
++  name="Biz ID"
++  dataDxfId="7"
++><calculatedColumnFormula>BusinessModelTable_fromISO20022[[#This Row],[Business Component Name]][&]IF(BusinessModelTable_fromISO20022[[#This Row],[Business Element Name]]="","","."[&]BusinessModelTable_fromISO20022[[#This Row],[Business Element Name]])</calculatedColumnFormula></tableColumn><tableColumn
++  id="1"
++  xr3:uid="{1B07F6A5-D927-934C-98D2-AD73EB0B6DC5}"
++  name="Business Component Name"
++  dataDxfId="6"
++  ><tableColumn
++  id="2"
++  xr3:uid="{A68FA9AF-4D0B-0C42-AC15-ABDDD9972617}"
++  name="Business Element Name"
++  dataDxfId="5"
++  ><tableColumn
++  id="3"
++  xr3:uid="{E641B39D-77CF-0845-A71B-2C771AAF0C72}"
++  name="Business Component Parent Name"
++  dataDxfId="4"
++  ><tableColumn
++  id="4"
++  xr3:uid="{60F5786E-13DC-E045-A1F3-541010D473C8}"
++  name="Documentation"
++  dataDxfId="3"
++  ><tableColumn
++  id="5"
++  xr3:uid="{4D2D7891-D561-6149-8890-6DC8686B9FD8}"
++  name="Business Element Type Name"
++  dataDxfId="2"
++  ><tableColumn
++  id="6"
++  xr3:uid="{D7FE5C6A-2C97-4F4B-B3DB-CD66650810D6}"
++  name="Name of Opposite End"
++  dataDxfId="1"
++  ></tableColumns><tableStyleInfo
++  name="TableStyleLight9"
++  showFirstColumn="0"
++  showLastColumn="0"
++  showRowStripes="1"
++  showColumnStripes="0"
++  ></table>
+\ No newline at end of file
+```

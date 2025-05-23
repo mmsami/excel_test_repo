@@ -1,2 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="2" xr:uid="{5F63F13B-D81A-4BD1-A1F9-E9B2C3C7EAD0}" name="meta_NonCapitalizedTitleWords" displayName="meta_NonCapitalizedTitleWords" ref="A1:B577" totalsRowShown="0"><autoFilter ref="A1:B577" xr:uid="{5F63F13B-D81A-4BD1-A1F9-E9B2C3C7EAD0}"/><tableColumns count="2"><tableColumn id="1" xr3:uid="{0347FD03-E809-492B-90C0-889896B0F0CE}" name="ID"/><tableColumn id="2" xr3:uid="{F048409C-4491-4C40-A5A6-7D46EDFAF441}" name="Word"/></tableColumns><tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>
+<table
+  xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  mc:Ignorable="xr xr3"
+  xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
+  xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3"
+  id="2"
+  xr:uid="{5F63F13B-D81A-4BD1-A1F9-E9B2C3C7EAD0}"
+  name="meta_NonCapitalizedTitleWords"
+  displayName="meta_NonCapitalizedTitleWords"
+  ref="A1:B577"
+  totalsRowShown="0"
+  ><autoFilter
+  ref="A1:B577"
+  xr:uid="{5F63F13B-D81A-4BD1-A1F9-E9B2C3C7EAD0}"
+><tableColumns count="2"><tableColumn
+  id="1"
+  xr3:uid="{0347FD03-E809-492B-90C0-889896B0F0CE}"
+  name="ID"
+  ><tableColumn
+  id="2"
+  xr3:uid="{F048409C-4491-4C40-A5A6-7D46EDFAF441}"
+  name="Word"
+  ></tableColumns><tableStyleInfo
+  name="TableStyleLight9"
+  showFirstColumn="0"
+  showLastColumn="0"
+  showRowStripes="1"
+  showColumnStripes="0"
+  ></table>

@@ -1,0 +1,90 @@
+# Changes in 20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/xl/tables/table6.xml
+
+```diff
+diff --git a/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/xl/tables/table6.xml b/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/xl/tables/table6.xml
+index 5611454..99f7afa 100644
+--- a/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/xl/tables/table6.xml
++++ b/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/20250429_veri.excel_v05.20_testLayer3_emptyClassifiersProperties/xl/tables/table6.xml
+@@ -1,2 +1,77 @@
+-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+-<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="8" xr:uid="{72D1D787-80C1-41B3-A5E1-361C96CBA839}" name="meta_PackageDocumentation" displayName="meta_PackageDocumentation" ref="A1:J19" totalsRowShown="0" headerRowDxfId="193" dataDxfId="191" headerRowBorderDxfId="192" tableBorderDxfId="190" totalsRowBorderDxfId="189"><autoFilter ref="A1:J19" xr:uid="{72D1D787-80C1-41B3-A5E1-361C96CBA839}"/><tableColumns count="10"><tableColumn id="1" xr3:uid="{F69362F0-9487-44C4-993A-5B2A248EFEFC}" name="ID" dataDxfId="188"/><tableColumn id="10" xr3:uid="{0FF33643-B1A7-4D2C-B485-B80F1C00BAC7}" name="Kind:srcLastSaved"/><tableColumn id="2" xr3:uid="{DEE0911D-8686-4E73-9CBA-9D80643E8EA5}" name="Kind:src" dataDxfId="187"><calculatedColumnFormula>IF(meta_PackageDocumentation[[#This Row],[Kind:srcLastSaved]]="",IF(meta_PackageDocumentation[[#This Row],[Kind]]="","",INDEX(meta_Classifiers[ID],MATCH(meta_PackageDocumentation[[#This Row],[Kind]],meta_Classifiers[Display Qualified],0))),meta_PackageDocumentation[[#This Row],[Kind:srcLastSaved]])</calculatedColumnFormula></tableColumn><tableColumn id="3" xr3:uid="{CB794C21-D1C3-48B1-8E5D-79BBADE1C529}" name="Kind" dataDxfId="186"/><tableColumn id="4" xr3:uid="{95386E7E-2DB3-484E-AA98-50A8CAD62D87}" name="Package" dataDxfId="185"/><tableColumn id="5" xr3:uid="{FC7BB08F-0ED4-4A9E-A0A1-FC8AB8C0FB4B}" name="Sub Package" dataDxfId="184"/><tableColumn id="7" xr3:uid="{F225BA70-7F99-4426-9779-6E7BD00A7C6C}" name="Package Display" dataDxfId="183"/><tableColumn id="6" xr3:uid="{2301BADC-4346-4B97-ADAA-F066AC1A9D66}" name="Topic Order" dataDxfId="182"/><tableColumn id="8" xr3:uid="{58EBC06B-6057-42D0-B230-9B5F5DEFF0AD}" name="Topic" dataDxfId="181"/><tableColumn id="9" xr3:uid="{3B170A2B-1D49-4772-8781-3E2FA0A71920}" name="Definition" dataDxfId="180"/></tableColumns><tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>
+\ No newline at end of file
++<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
++<table
++  xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
++  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
++  mc:Ignorable="xr xr3"
++  xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
++  xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3"
++  id="8"
++  xr:uid="{72D1D787-80C1-41B3-A5E1-361C96CBA839}"
++  name="meta_PackageDocumentation"
++  displayName="meta_PackageDocumentation"
++  ref="A1:J19"
++  totalsRowShown="0"
++  headerRowDxfId="193"
++  dataDxfId="191"
++  headerRowBorderDxfId="192"
++  tableBorderDxfId="190"
++  totalsRowBorderDxfId="189"
++  ><autoFilter
++  ref="A1:J19"
++  xr:uid="{72D1D787-80C1-41B3-A5E1-361C96CBA839}"
++><tableColumns count="10"><tableColumn
++  id="1"
++  xr3:uid="{F69362F0-9487-44C4-993A-5B2A248EFEFC}"
++  name="ID"
++  dataDxfId="188"
++  ><tableColumn
++  id="10"
++  xr3:uid="{0FF33643-B1A7-4D2C-B485-B80F1C00BAC7}"
++  name="Kind:srcLastSaved"
++  ><tableColumn
++  id="2"
++  xr3:uid="{DEE0911D-8686-4E73-9CBA-9D80643E8EA5}"
++  name="Kind:src"
++  dataDxfId="187"
++><calculatedColumnFormula>IF(meta_PackageDocumentation[[#This Row],[Kind:srcLastSaved]]="",IF(meta_PackageDocumentation[[#This Row],[Kind]]="","",INDEX(meta_Classifiers[ID],MATCH(meta_PackageDocumentation[[#This Row],[Kind]],meta_Classifiers[Display Qualified],0))),meta_PackageDocumentation[[#This Row],[Kind:srcLastSaved]])</calculatedColumnFormula></tableColumn><tableColumn
++  id="3"
++  xr3:uid="{CB794C21-D1C3-48B1-8E5D-79BBADE1C529}"
++  name="Kind"
++  dataDxfId="186"
++  ><tableColumn
++  id="4"
++  xr3:uid="{95386E7E-2DB3-484E-AA98-50A8CAD62D87}"
++  name="Package"
++  dataDxfId="185"
++  ><tableColumn
++  id="5"
++  xr3:uid="{FC7BB08F-0ED4-4A9E-A0A1-FC8AB8C0FB4B}"
++  name="Sub Package"
++  dataDxfId="184"
++  ><tableColumn
++  id="7"
++  xr3:uid="{F225BA70-7F99-4426-9779-6E7BD00A7C6C}"
++  name="Package Display"
++  dataDxfId="183"
++  ><tableColumn
++  id="6"
++  xr3:uid="{2301BADC-4346-4B97-ADAA-F066AC1A9D66}"
++  name="Topic Order"
++  dataDxfId="182"
++  ><tableColumn
++  id="8"
++  xr3:uid="{58EBC06B-6057-42D0-B230-9B5F5DEFF0AD}"
++  name="Topic"
++  dataDxfId="181"
++  ><tableColumn
++  id="9"
++  xr3:uid="{3B170A2B-1D49-4772-8781-3E2FA0A71920}"
++  name="Definition"
++  dataDxfId="180"
++  ></tableColumns><tableStyleInfo
++  name="TableStyleLight9"
++  showFirstColumn="0"
++  showLastColumn="0"
++  showRowStripes="1"
++  showColumnStripes="0"
++  ></table>
+\ No newline at end of file
+```

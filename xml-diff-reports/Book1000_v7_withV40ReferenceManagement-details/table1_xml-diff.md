@@ -1,0 +1,62 @@
+# Changes in Book1000_v7_withV40ReferenceManagement/xl/tables/table1.xml
+
+```diff
+diff --git a/Book1000_v7_withV40ReferenceManagement/xl/tables/table1.xml b/Book1000_v7_withV40ReferenceManagement/xl/tables/table1.xml
+new file mode 100644
+index 0000000..256846a
+--- /dev/null
++++ b/Book1000_v7_withV40ReferenceManagement/xl/tables/table1.xml
+@@ -0,0 +1,51 @@
++<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
++<table
++  xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
++  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
++  mc:Ignorable="xr xr3"
++  xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
++  xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3"
++  id="1"
++  xr:uid="{130F8B8F-D407-43B8-A880-7578C5A01AEF}"
++  name="Table1"
++  displayName="Table1"
++  ref="A1:E1001"
++  totalsRowShown="0"
++  headerRowDxfId="14"
++  dataDxfId="12"
++  headerRowBorderDxfId="13"
++  ><autoFilter
++  ref="A1:E1001"
++  xr:uid="{130F8B8F-D407-43B8-A880-7578C5A01AEF}"
++><tableColumns count="5"><tableColumn
++  id="1"
++  xr3:uid="{AE0AB6AE-A47C-46EF-8991-64C6463CD4F8}"
++  name="ID"
++  dataDxfId="11"
++  ><tableColumn
++  id="2"
++  xr3:uid="{85184C7D-DCB9-42BA-A488-C12ABDA8EFE9}"
++  name="Ref:srcLastSaved"
++  dataDxfId="10"
++  ><tableColumn
++  id="4"
++  xr3:uid="{923FD8ED-28C5-4CB3-8C87-9917F7DBCEF4}"
++  name="Ref:selectFromSourceLastSaved"
++  dataDxfId="9"
++><calculatedColumnFormula>IF(Table1[[#This Row],[Ref:srcLastSaved]]="","",INDEX(Table2[Selector],MATCH(Table1[[#This Row],[Ref:srcLastSaved]],Table2[ID],0)))[&]"Goofy"</calculatedColumnFormula></tableColumn><tableColumn
++  id="5"
++  xr3:uid="{08C9A757-0B42-4205-9629-A9536EDBA5B0}"
++  name="Ref:srcFromActual"
++  dataDxfId="8"
++><calculatedColumnFormula>IF(Table1[[#This Row],[Ref]]="","",INDEX(Table2[ID],MATCH(Table1[[#This Row],[Ref]], Table2[Selector],0)))</calculatedColumnFormula></tableColumn><tableColumn
++  id="3"
++  xr3:uid="{6DC90CBB-8D95-4FE2-902C-199AC5BD0806}"
++  name="Ref"
++  dataDxfId="7"
++  ></tableColumns><tableStyleInfo
++  name="TableStyleLight9"
++  showFirstColumn="0"
++  showLastColumn="0"
++  showRowStripes="1"
++  showColumnStripes="0"
++  ></table>
+\ No newline at end of file
+```
