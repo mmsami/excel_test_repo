@@ -218,7 +218,7 @@ def process_excel_files():
     return excel_files
 
 def process_xml_files():
-    """Process XML files and package to Excel"""
+    """Process XML files but don't package back to Excel"""
     changed_files = get_changed_files()
     
     xml_dirs = set()
@@ -237,16 +237,8 @@ def process_xml_files():
                 
                 current_dir = current_dir.parent
     
-    for xml_dir in xml_dirs:
-        excel_path = package_xml_to_excel(xml_dir)
-        
-        repo = git.Repo('.')
-        repo.git.add(str(excel_path))
-        
-        overwritten_path = excel_path.with_name(f"{excel_path.stem}_overwritten{excel_path.suffix}")
-        if overwritten_path.exists():
-            repo.git.add(str(overwritten_path))
-    
+    # Don't package back to Excel - just return directories for diff reporting
+    print(f"Found {len(xml_dirs)} XML directories with changes")
     return list(xml_dirs)
 
 def generate_xml_diff_report(xml_dirs):
