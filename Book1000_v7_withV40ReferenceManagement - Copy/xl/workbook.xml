@@ -13,25 +13,22 @@
   appName="xl"
   lastEdited="7"
   lowestEdited="7"
-  rupBuild="28827"
-  codeName="{0730EB3F-75F1-03CD-C966-41DC9FD4AD36}"
-  ><workbookPr
-  codeName="ThisWorkbook"
-  defaultThemeVersion="202300"
-><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="x15"><x15ac:absPath
-  url="https://d.docs.live.net/54e312b60f6066ea/20200319/20200319 PROJECTS/veri.excel/"
+  rupBuild="10209"
+  codeName="{857A39E2-67AF-9BA6-E15C-A4B3A0C75593}"
+><workbookPr codeName="ThisWorkbook"/><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="x15"><x15ac:absPath
+  url="/Users/muntasirsami/Downloads/"
   xmlns:x15ac="http://schemas.microsoft.com/office/spreadsheetml/2010/11/ac"
   ></mc:Choice></mc:AlternateContent><xr:revisionPtr
-  revIDLastSave="58"
-  documentId="8_{6B4B5539-86F9-40A5-8233-9AEB3A0B5781}"
+  revIDLastSave="0"
+  documentId="13_ncr:1_{A63A221F-458B-8244-8829-90444A765C8D}"
   xr6:coauthVersionLast="47"
   xr6:coauthVersionMax="47"
-  xr10:uidLastSave="{B170031C-38F7-4D33-AC7D-FE1A9F564D1F}"
+  xr10:uidLastSave="{00000000-0000-0000-0000-000000000000}"
   ><bookViews><workbookView
-  xWindow="-110"
-  yWindow="-110"
-  windowWidth="38620"
-  windowHeight="21220"
+  xWindow="0"
+  yWindow="500"
+  windowWidth="33600"
+  windowHeight="20500"
   xr2:uid="{5F202DD4-F6ED-4666-ABF4-39EC92EA315B}"
   ></bookViews><sheets><sheet
   name="Table1"
@@ -47,4 +44,4 @@
 ><x15:workbookPr chartTrackingRefBase="1"/></ext><ext
   uri="{B58B0392-4F1F-4190-BB64-5DF3571DCE5F}"
   xmlns:xcalcf="http://schemas.microsoft.com/office/spreadsheetml/2018/calcfeatures"
-><xcalcf:calcFeatures><xcalcf:feature name="microsoft.com:RD"/><xcalcf:feature name="microsoft.com:Single"/><xcalcf:feature name="microsoft.com:FV"/><xcalcf:feature name="microsoft.com:CNMTM"/><xcalcf:feature name="microsoft.com:LET_WF"/><xcalcf:feature name="microsoft.com:LAMBDA_WF"/><xcalcf:feature name="microsoft.com:ARRAYTEXT_WF"/></xcalcf:calcFeatures></ext></extLst></workbook>
+><xcalcf:calcFeatures><xcalcf:feature name="microsoft.com:RD"/><xcalcf:feature name="microsoft.com:Single"/><xcalcf:feature name="microsoft.com:FV"/><xcalcf:feature name="microsoft.com:CNMTM"/><xcalcf:feature name="microsoft.com:LET_WF"/><xcalcf:feature name="microsoft.com:ARRAYTEXT_WF"/></xcalcf:calcFeatures></ext></extLst></workbook>
