@@ -69,7 +69,7 @@ def extract_excel_selective(excel_path):
     return excel_dir
 
 def format_xml_files(directory):
-    """Format XML files with attributes on separate lines for better diffing"""
+    """Format XML files with attributes on separate lines and decode entities for better diffing"""
     try:
         xml_count = 0
         
@@ -81,7 +81,14 @@ def format_xml_files(directory):
                         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                             content = f.read()
                         
-                        # This pattern finds opening tags with attributes
+                        # Decode XML entities for better readability
+                        content = content.replace('&amp;', '&')
+                        content = content.replace('&lt;', '<')
+                        content = content.replace('&gt;', '>')
+                        content = content.replace('&quot;', '"')
+                        content = content.replace('&apos;', "'")
+                        
+                        # Format XML tags with attributes on separate lines
                         pattern = r'<([a-zA-Z0-9_:-]+)(\s+[^>]+)>'
                         
                         def format_attributes(match):
@@ -104,7 +111,7 @@ def format_xml_files(directory):
                         
                         formatted_content = re.sub(pattern, format_attributes, content)
                         
-                        # Add indentation
+                        # Add proper indentation
                         lines = formatted_content.split('\n')
                         indented_lines = []
                         indent_level = 0
@@ -131,7 +138,7 @@ def format_xml_files(directory):
                     except Exception as e:
                         print(f"Error formatting {file_path}: {e}")
         
-        print(f"Formatted {xml_count} XML files in {directory}")
+        print(f"Formatted {xml_count} XML files with decoded entities")
     except Exception as e:
         print(f"Warning: XML formatting failed - {e}")
 
