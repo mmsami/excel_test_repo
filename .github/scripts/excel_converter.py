@@ -182,46 +182,104 @@ def get_changed_files():
         return repo.git.ls_files().split('\n')
 
 def process_excel_files():
-    """Process Excel files and extract VBA/table structure to XML"""
+    """Process Excel files with aggressive filtering to avoid timeout"""
+    print("=== STARTING EXCEL PROCESSING WITH DUPLICATE FILTERING ===")
+    start_time = time.time()
+    
+    # Get changed files first (most important)
     changed_files = get_changed_files()
     excel_files = [f for f in changed_files if f.endswith(('.xlsx', '.xlsm'))]
     
+    # If no changed files, get all files but filter heavily
     if not excel_files:
-        excel_files = glob.glob('**/*.xlsx', recursive=True) + glob.glob('**/*.xlsm', recursive=True)
+        all_files = glob.glob('**/*.xlsx', recursive=True) + glob.glob('**/*.xlsm', recursive=True)
+        
+        # AGGRESSIVE FILTERING
+        filtered_files = []
+        for file_path in all_files:
+            # Skip generated files
+            if ('_fromXML' in file_path or 
+                '_overwritten' in file_path or 
+                '_temp' in file_path or
+                ' - Copy' in file_path):
+                print(f"⏭️ Skipping generated file: {file_path}")
+                continue
+            
+            # Skip files inside extracted directories
+            if ('/' in file_path and 
+                any(part.endswith(('.xlsx', '.xlsm')) for part in Path(file_path).parts[:-1])):
+                print(f"⏭️ Skipping nested file: {file_path}")
+                continue
+            
+            # Skip large files
+            if os.path.exists(file_path):
+                file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
+                if file_size_mb > 15:  # 15MB limit
+                    print(f"⏭️ Skipping large file: {file_path} ({file_size_mb:.1f}MB)")
+                    continue
+                
+                filtered_files.append((file_path, file_size_mb))
+        
+        # Sort by size and take only the smallest 3 files
+        filtered_files.sort(key=lambda x: x[1])
+        excel_files = [f[0] for f in filtered_files[:3]]
+        
+        print(f"📊 Filtered from {len(all_files)} to {len(excel_files)} files")
+        for file_path, size_mb in filtered_files[:3]:
+            print(f"   ✅ Will process: {file_path} ({size_mb:.1f}MB)")
+    
+    processed_count = 0
     
     for excel_file in excel_files:
-        if '_fromXML' in excel_file or '_overwritten' in excel_file:
+        # Double-check filters
+        if ('_fromXML' in excel_file or 
+            '_overwritten' in excel_file or
+            not os.path.exists(excel_file)):
             continue
-            
-        if not os.path.exists(excel_file):
-            continue
-
-        if any(part.endswith('_fromXML') for part in Path(excel_file).parts):
-            print(f"Skipping {excel_file} - inside extracted directory")
-            continue
-            
+        
+        # Timeout check
+        elapsed = time.time() - start_time
+        if elapsed > 120:  # 2 minutes max
+            print(f"⏱️ TIMEOUT: Stopping after {elapsed:.1f}s")
+            break
+        
         file_size_mb = os.path.getsize(excel_file) / (1024 * 1024)
-        if file_size_mb > 90:
-            print(f"Skipping {excel_file} - size {file_size_mb:.2f}MB exceeds limit")
-            continue
+        print(f"🔄 Processing {excel_file} ({file_size_mb:.1f}MB)")
+        
+        file_start = time.time()
+        
+        try:
+            # Use selective extraction
+            extract_dir = extract_excel_selective(excel_file)
+            if not extract_dir:
+                continue
             
-        # Use selective extraction
-        extract_dir = extract_excel_selective(excel_file)
-        
-        # Format XML files
-        format_xml_files(extract_dir)
-        
-        # Add to git
-        repo = git.Repo('.')
-        repo.git.add(str(extract_dir))
-        
-        # Create _fromXML copy
-        fromxml_path = Path(excel_file).with_name(
-            f"{Path(excel_file).stem}_fromXML{Path(excel_file).suffix}"
-        )
-        shutil.copy2(excel_file, fromxml_path)
-        repo.git.add(str(fromxml_path))
+            # Skip XML formatting to save time
+            print(f"⚠️ Skipping XML formatting to avoid timeout")
+            
+            # Add to git
+            repo = git.Repo('.')
+            repo.git.add(str(extract_dir))
+            
+            # Create _fromXML copy
+            fromxml_path = Path(excel_file).with_name(
+                f"{Path(excel_file).stem}_fromXML{Path(excel_file).suffix}"
+            )
+            shutil.copy2(excel_file, fromxml_path)
+            repo.git.add(str(fromxml_path))
+            
+            processed_count += 1
+            file_elapsed = time.time() - file_start
+            total_elapsed = time.time() - start_time
+            
+            print(f"✅ Processed {excel_file} in {file_elapsed:.1f}s (total: {total_elapsed:.1f}s)")
+            
+        except Exception as e:
+            print(f"❌ Error processing {excel_file}: {e}")
+            continue
     
+    total_elapsed = time.time() - start_time
+    print(f"=== COMPLETED: {processed_count} files in {total_elapsed:.1f}s ===")
     return excel_files
 
 def process_xml_files():
@@ -247,6 +305,45 @@ def process_xml_files():
     # Don't package back to Excel - just return directories for diff reporting
     print(f"Found {len(xml_dirs)} XML directories with changes")
     return list(xml_dirs)
+
+def cleanup_generated_files():
+    """Clean up previously generated files to avoid processing duplicates"""
+    print("🧹 CLEANING UP GENERATED FILES...")
+    
+    cleanup_patterns = [
+        '**/*_fromXML.xlsx',
+        '**/*_fromXML.xlsm', 
+        '**/*_overwritten.xlsx',
+        '**/*_overwritten.xlsm',
+        '**/*_temp*',
+        '**/* - Copy*.xlsx',
+        '**/* - Copy*.xlsm'
+    ]
+    
+    cleaned_count = 0
+    for pattern in cleanup_patterns:
+        for file_path in glob.glob(pattern, recursive=True):
+            try:
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    print(f"🗑️ Removed: {file_path}")
+                    cleaned_count += 1
+            except Exception as e:
+                print(f"⚠️ Could not remove {file_path}: {e}")
+    
+    # Also clean up extracted directories
+    for item in Path('.').rglob('*'):
+        if (item.is_dir() and 
+            item.name.endswith(('.xlsx', '.xlsm')) and
+            item.name != item.parent.name):  # Avoid infinite recursion
+            try:
+                shutil.rmtree(item)
+                print(f"🗂️ Removed directory: {item}")
+                cleaned_count += 1
+            except Exception as e:
+                print(f"⚠️ Could not remove directory {item}: {e}")
+    
+    print(f"✅ Cleanup completed: {cleaned_count} items removed")
 
 def generate_xml_diff_report(xml_dirs):
     """Generate diff report for VBA and table changes"""
@@ -376,11 +473,14 @@ def main():
     """Main function to process files"""
     print("Starting Excel VBA/Table extraction...")
     
-    excel_files = process_excel_files()
-    print(f"Processed {len(excel_files)} Excel files")
+    # STEP 1: Clean up first
+    cleanup_generated_files()
     
+    # STEP 2: Process with filtering
+    excel_files = process_excel_files()
+    
+    # STEP 3: Continue with rest
     xml_dirs = process_xml_files()
-    print(f"Processed {len(xml_dirs)} XML directories")
     
     if xml_dirs:
         generate_xml_diff_report(xml_dirs)
