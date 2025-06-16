@@ -70,7 +70,7 @@ def extract_excel_selective(excel_path):
     return excel_dir
 
 def format_xml_files(directory):
-    """Format XML files with attributes on separate lines and decode entities for better diffing"""
+    """Format XML files - FAST VERSION that preserves formula newlines"""
     try:
         xml_count = 0
         
@@ -78,70 +78,62 @@ def format_xml_files(directory):
             for file in files:
                 if file.endswith('.xml'):
                     file_path = os.path.join(root, file)
+                    
+                    # Skip large XML files to avoid timeout
+                    if os.path.getsize(file_path) > 1024 * 1024:  # 1MB limit
+                        print(f"⏭️ Skipping large XML file: {file_path}")
+                        continue
+                    
                     try:
                         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                             content = f.read()
                         
-                        # Decode XML entities for better readability
+                        # Entity decoding (manager's requirement for better diffs)
                         content = content.replace('&amp;', '&')
                         content = content.replace('&lt;', '<')
                         content = content.replace('&gt;', '>')
                         content = content.replace('&quot;', '"')
                         content = content.replace('&apos;', "'")
                         
-                        # Format XML tags with attributes on separate lines
-                        pattern = r'<([a-zA-Z0-9_:-]+)(\s+[^>]+)>'
-                        
-                        def format_attributes(match):
-                            tag_name = match.group(1)
-                            attributes = match.group(2).strip()
-                            
-                            if not attributes or ' ' not in attributes:
-                                return f"<{tag_name} {attributes}>"
-                            
-                            formatted_attrs = ""
-                            attr_indent = "  "
-                            
-                            attr_pattern = r'([a-zA-Z0-9_:-]+)="([^"]*)"'
-                            attr_matches = re.findall(attr_pattern, attributes)
-                            
-                            for attr_name, attr_value in attr_matches:
-                                formatted_attrs += f"\n{attr_indent}{attr_name}=\"{attr_value}\""
-                            
-                            return f"<{tag_name}{formatted_attrs}\n>"
-                        
-                        formatted_content = re.sub(pattern, format_attributes, content)
-                        
-                        # Add proper indentation
-                        lines = formatted_content.split('\n')
-                        indented_lines = []
+                        # Basic indentation without complex regex (FAST)
+                        lines = content.split('\n')
+                        formatted_lines = []
                         indent_level = 0
                         
                         for line in lines:
                             stripped = line.strip()
-                            
+                            if not stripped:
+                                continue
+                                
+                            # Closing tags
                             if stripped.startswith('</'):
                                 indent_level = max(0, indent_level - 1)
-                                
-                            if stripped:
-                                if '=' in stripped and not stripped.startswith('<'):
-                                    indented_lines.append(line)
-                                else:
-                                    indented_lines.append('  ' * indent_level + stripped)
-                            
-                            if stripped.startswith('<') and not stripped.startswith('</') and not stripped.endswith('/>') and not stripped.startswith('<?'):
-                                indent_level += 1
+                                formatted_lines.append('    ' * indent_level + stripped)
+                            # Self-closing tags
+                            elif stripped.endswith('/>'):
+                                formatted_lines.append('    ' * indent_level + stripped)
+                            # Opening tags
+                            elif stripped.startswith('<') and not stripped.startswith('<?'):
+                                formatted_lines.append('    ' * indent_level + stripped)
+                                if not stripped.endswith('/>'):
+                                    indent_level += 1
+                            # XML declaration
+                            elif stripped.startswith('<?'):
+                                formatted_lines.append(stripped)
+                            # Content (preserves formula newlines - CRITICAL!)
+                            else:
+                                formatted_lines.append(stripped)
                         
                         with open(file_path, 'w', encoding='utf-8') as f:
-                            f.write('\n'.join(indented_lines))
+                            f.write('\n'.join(formatted_lines))
                         
                         xml_count += 1
                     except Exception as e:
-                        print(f"Error formatting {file_path}: {e}")
+                        print(f"⚠️ Error formatting {file_path}: {e}")
         
-        print(f"Formatted {xml_count} XML files with decoded entities")
+        print(f"✅ Formatted {xml_count} XML files for better Git diffing")
     except Exception as e:
-        print(f"Warning: XML formatting failed - {e}")
+        print(f"⚠️ XML formatting failed - {e}")
 
 def package_xml_to_excel(xml_dir):
     """Package XML directory back to Excel file"""
@@ -295,7 +287,8 @@ def process_excel_files():
                 continue
             
             # Skip XML formatting to save time
-            print(f"⚠️ Skipping XML formatting to avoid timeout")
+            print("🎨 Formatting XML files for better Git diffing...")
+            format_xml_files(extract_dir)
             
             # Add to git
             repo = git.Repo('.')
