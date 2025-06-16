@@ -1,4 +1,4 @@
-name: Excel XML Conversion
+name: Debug Workflow
 
 permissions:
   contents: write
