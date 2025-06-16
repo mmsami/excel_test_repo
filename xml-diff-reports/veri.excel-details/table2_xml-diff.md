@@ -1,0 +1,16 @@
+# Changes in veri.excel/xl/tables/table2.xml
+
+```diff
+diff --git a/veri.excel/xl/tables/table2.xml b/veri.excel/xl/tables/table2.xml
+new file mode 100644
+index 0000000..e1626ed
+--- /dev/null
++++ b/veri.excel/xl/tables/table2.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
++<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="11" xr:uid="{5D41897A-4E9B-4AF0-8FAF-4F427F97D3CC}" name="finance_Positions" displayName="finance_Positions" ref="A1:J2" totalsRowShown="0" headerRowDxfId="421" headerRowBorderDxfId="420" tableBorderDxfId="419"><autoFilter ref="A1:J2" xr:uid="{25037879-D638-41CA-BC3C-A09C30E02942}"/><tableColumns count="10"><tableColumn id="1" xr3:uid="{410D3616-A12B-4569-99C8-B31567D218F5}" name="ID"/><tableColumn id="2" xr3:uid="{791ECF31-6B62-4ED1-9B3A-2D54E8FA0E30}" name="Kind:src"/><tableColumn id="3" xr3:uid="{F2D599DB-7A92-43BC-B0D6-27C2A486A540}" name="Kind" dataDxfId="418"><calculatedColumnFormula xml:space="preserve"> IF( TRIM( finance_Positions[[#This Row],[Kind:src]] ) = "", "",
++INDEX( meta_Classifiers[Display Qualified], MATCH( finance_Positions[[#This Row],[Kind:src]], meta_Classifiers[ID], 0 ) ) )</calculatedColumnFormula></tableColumn><tableColumn id="4" xr3:uid="{BD6A0918-45C2-4DC3-A399-D28A9B904684}" name="Package"/><tableColumn id="10" xr3:uid="{39AA7D50-5390-4C2C-BDE4-9C245C06649A}" name="Portfolio:src"/><tableColumn id="5" xr3:uid="{F62B84A2-DA72-42D2-B668-3CBF12C5C991}" name="Portfolio" dataDxfId="417"><calculatedColumnFormula xml:space="preserve"> IF( TRIM( finance_Positions[[#This Row],[Portfolio:src]] ) = "", "",
++INDEX( finance_Portfolios[Owner], MATCH( finance_Positions[[#This Row],[Portfolio:src]], finance_Portfolios[ID], 0 ) ) )</calculatedColumnFormula></tableColumn><tableColumn id="12" xr3:uid="{7C611447-0EF1-4971-A4E9-04491247A037}" name="Security:src"/><tableColumn id="6" xr3:uid="{528E714D-894B-4CD4-A5AE-4BA6CFE1D031}" name="Security" dataDxfId="416"><calculatedColumnFormula xml:space="preserve"> IF( TRIM( finance_Positions[[#This Row],[Security:src]] ) = "", "",
++INDEX( finance_Securities[Trading Symbol], MATCH( finance_Positions[[#This Row],[Security:src]], finance_Securities[ID], 0 ) ) )</calculatedColumnFormula></tableColumn><tableColumn id="7" xr3:uid="{8C001AAA-A244-485E-8BBA-778E3B5D8950}" name="Amount"/><tableColumn id="8" xr3:uid="{82CE1338-DB53-432C-994A-74813E641E06}" name="Valuation"/></tableColumns><tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>
+\ No newline at end of file
+```
