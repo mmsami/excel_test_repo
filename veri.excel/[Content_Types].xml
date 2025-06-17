@@ -97,8 +97,6 @@
     ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml"/<Override
     PartName="/xl/tables/table20.xml"
     ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml"/<Override
-    PartName="/xl/persons/person.xml"
-    ContentType="application/vnd.ms-excel.person+xml"/<Override
     PartName="/xl/calcChain.xml"
     ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.calcChain+xml"/<Override
     PartName="/xl/vbaProject.bin"
