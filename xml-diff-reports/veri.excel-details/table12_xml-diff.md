@@ -2,92 +2,73 @@
 
 ```diff
 diff --git a/veri.excel/xl/tables/table12.xml b/veri.excel/xl/tables/table12.xml
-index b710d8c..cbafb35 100644
+index cbafb35..7bb89cc 100644
 --- a/veri.excel/xl/tables/table12.xml
 +++ b/veri.excel/xl/tables/table12.xml
-@@ -1,12 +1,72 @@
- <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
--<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="5" xr:uid="{00000000-000C-0000-FFFF-FFFF08000000}" name="meta_Literals" displayName="meta_Literals" ref="A1:J31" totalsRowShown="0" headerRowDxfId="209" dataDxfId="207" headerRowBorderDxfId="208" tableBorderDxfId="206"><autoFilter ref="A1:J31" xr:uid="{00000000-0009-0000-0100-000005000000}"/><tableColumns count="10"><tableColumn id="8" xr3:uid="{00000000-0010-0000-0800-000008000000}" name="ID" dataDxfId="205"/><tableColumn id="5" xr3:uid="{00000000-0010-0000-0800-000005000000}" name="Kind:src" dataDxfId="7"/><tableColumn id="2" xr3:uid="{00000000-0010-0000-0800-000002000000}" name="Kind" dataDxfId="204"><calculatedColumnFormula>IF(meta_Literals[[#This Row],[Kind:src]]="","",INDEX(meta_Classifiers[Display Qualified],MATCH(meta_Literals[[#This Row],[Kind:src]],meta_Classifiers[ID],0)))</calculatedColumnFormula></tableColumn><tableColumn id="6" xr3:uid="{00000000-0010-0000-0800-000006000000}" name="Package"/><tableColumn id="1" xr3:uid="{00000000-0010-0000-0800-000001000000}" name="Sub Package" dataDxfId="203"/><tableColumn id="10" xr3:uid="{00000000-0010-0000-0800-00000A000000}" name="Display:q" dataDxfId="202"><calculatedColumnFormula>IF(TRIM(meta_Literals[[#This Row],[Package]])="","",TRIM(LOWER(meta_Literals[[#This Row],[Package]]))&"::")&meta_Literals[[#This Row],[Display]]</calculatedColumnFormula></tableColumn><tableColumn id="9" xr3:uid="{00000000-0010-0000-0800-000009000000}" name="Display" dataDxfId="201"><calculatedColumnFormula>TRIM(SUBSTITUTE(meta_Literals[[#This Row],[Name]]," ",""))</calculatedColumnFormula></tableColumn><tableColumn id="3" xr3:uid="{00000000-0010-0000-0800-000003000000}" name="Name" dataDxfId="200"/><tableColumn id="7" xr3:uid="{00000000-0010-0000-0800-000007000000}" name="Parent:src"/><tableColumn id="4" xr3:uid="{00000000-0010-0000-0800-000004000000}" name="Parent" dataDxfId="199"><calculatedColumnFormula xml:space="preserve"> _xlfn.IFNA( IF( TRIM( meta_Literals[[#This Row],[Parent:src]] ) = "",
--"",
--IF( LEFT(meta_Literals[[#This Row],[Parent:src]],1)="_",
--RIGHT(meta_Literals[[#This Row],[Parent:src]],LEN(meta_Literals[[#This Row],[Parent:src]])-1),
--IF( TRIM( meta_Literals[[#This Row],[Package]] )
-+<table>
-+    xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
-+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-+    mc:Ignorable="xr
-+    xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
-+    xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3"
-+    id="5"
-+    xr:uid="{00000000-000C-0000-FFFF-FFFF08000000}"
-+    name="meta_Literals"
-+    displayName="meta_Literals"
-+    ref="A1:J31"
-+    totalsRowShown="0"
-+    headerRowDxfId="204"
-+    dataDxfId="202"
-+    headerRowBorderDxfId="203"
-+    tableBorderDxfId="201"<autoFilter
-+    ref="A1:J31"
-+    xr:uid="{00000000-0009-0000-0100-000005000000}"/<tableColumns
-+    count="10"<tableColumn
-+    id="8"
-+    xr3:uid="{00000000-0010-0000-0800-000008000000}"
-+    name="ID"
+@@ -11,25 +11,25 @@
+     displayName="meta_Literals"
+     ref="A1:J31"
+     totalsRowShown="0"
+-    headerRowDxfId="204"
+-    dataDxfId="202"
+-    headerRowBorderDxfId="203"
+-    tableBorderDxfId="201"<autoFilter
++    headerRowDxfId="205"
++    dataDxfId="203"
++    headerRowBorderDxfId="204"
++    tableBorderDxfId="202"<autoFilter
+     ref="A1:J31"
+     xr:uid="{00000000-0009-0000-0100-000005000000}"/<tableColumns
+     count="10"<tableColumn
+     id="8"
+     xr3:uid="{00000000-0010-0000-0800-000008000000}"
+     name="ID"
+-    dataDxfId="200"/<tableColumn
++    dataDxfId="201"/<tableColumn
+     id="5"
+     xr3:uid="{00000000-0010-0000-0800-000005000000}"
+     name="Kind:src"
+-    dataDxfId="199"/<tableColumn
 +    dataDxfId="200"/<tableColumn
-+    id="5"
-+    xr3:uid="{00000000-0010-0000-0800-000005000000}"
-+    name="Kind:src"
-+    dataDxfId="199"/<tableColumn
-+    id="2"
-+    xr3:uid="{00000000-0010-0000-0800-000002000000}"
-+    name="Kind"
-+    dataDxfId="198"<calculatedColumnFormulaIF(meta_Literals[[#This
-+    Row],[Kind:src]]="","",INDEX(meta_Classifiers[Display
-+    id="6"
-+    xr3:uid="{00000000-0010-0000-0800-000006000000}"
-+    name="Package"/<tableColumn
-+    id="1"
-+    xr3:uid="{00000000-0010-0000-0800-000001000000}"
-+    name="Sub
-+    dataDxfId="197"/<tableColumn
-+    id="10"
-+    xr3:uid="{00000000-0010-0000-0800-00000A000000}"
-+    name="Display:q"
-+    dataDxfId="196"<calculatedColumnFormulaIF(TRIM(meta_Literals[[#This
-+    Row],[Package]])="","",TRIM(LOWER(meta_Literals[[#This
-+    id="9"
-+    xr3:uid="{00000000-0010-0000-0800-000009000000}"
-+    name="Display"
-+    dataDxfId="195"<calculatedColumnFormulaTRIM(SUBSTITUTE(meta_Literals[[#This
-+    id="3"
-+    xr3:uid="{00000000-0010-0000-0800-000003000000}"
-+    name="Name"
-+    dataDxfId="194"/<tableColumn
-+    id="7"
-+    xr3:uid="{00000000-0010-0000-0800-000007000000}"
-+    name="Parent:src"/<tableColumn
-+    id="4"
-+    xr3:uid="{00000000-0010-0000-0800-000004000000}"
-+    name="Parent"
-+    dataDxfId="193"<calculatedColumnFormula
-+    xml:space="preserve"
-+    =
-+    "",
-+    IF( LEFT(meta_Literals[[#This Row],[Parent:src]],1)="_",
-+    RIGHT(meta_Literals[[#This Row],[Parent:src]],LEN(meta_Literals[[#This Row],[Parent:src]])-1),
-+    IF( TRIM( meta_Literals[[#This Row],[Package]] )
-     <> TRIM( INDEX( meta_Literals[Package], MATCH( meta_Literals[[#This Row],[Parent:src]], meta_Literals[ID],0 ) ) ),
--TRIM( INDEX( meta_Literals[Package], MATCH( meta_Literals[[#This Row],[Parent:src]], meta_Literals[ID], 0 ) ) )
--& "::"
--& INDEX( meta_Literals[Display], MATCH( meta_Literals[[#This Row],[Parent:src]], meta_Literals[ID], 0 ) ),
--INDEX( meta_Literals[Display], MATCH( meta_Literals[[#This Row],[Parent:src]], meta_Literals[ID], 0 ) )
--))), "")</calculatedColumnFormula></tableColumn></tableColumns><tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>
-\ No newline at end of file
-+        TRIM( INDEX( meta_Literals[Package], MATCH( meta_Literals[[#This Row],[Parent:src]], meta_Literals[ID], 0 ) ) )
-+        & "::"
-+        & INDEX( meta_Literals[Display], MATCH( meta_Literals[[#This Row],[Parent:src]], meta_Literals[ID], 0 ) ),
-+        INDEX( meta_Literals[Display], MATCH( meta_Literals[[#This Row],[Parent:src]], meta_Literals[ID], 0 ) )
-+        ))), "")</calculatedColumnFormula></tableColumn></tableColumns><tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>
-\ No newline at end of file
+     id="2"
+     xr3:uid="{00000000-0010-0000-0800-000002000000}"
+     name="Kind"
+-    dataDxfId="198"<calculatedColumnFormulaIF(meta_Literals[[#This
++    dataDxfId="199"<calculatedColumnFormulaIF(meta_Literals[[#This
+     Row],[Kind:src]]="","",INDEX(meta_Classifiers[Display
+     id="6"
+     xr3:uid="{00000000-0010-0000-0800-000006000000}"
+@@ -37,27 +37,27 @@
+     id="1"
+     xr3:uid="{00000000-0010-0000-0800-000001000000}"
+     name="Sub
+-    dataDxfId="197"/<tableColumn
++    dataDxfId="198"/<tableColumn
+     id="10"
+     xr3:uid="{00000000-0010-0000-0800-00000A000000}"
+     name="Display:q"
+-    dataDxfId="196"<calculatedColumnFormulaIF(TRIM(meta_Literals[[#This
++    dataDxfId="197"<calculatedColumnFormulaIF(TRIM(meta_Literals[[#This
+     Row],[Package]])="","",TRIM(LOWER(meta_Literals[[#This
+     id="9"
+     xr3:uid="{00000000-0010-0000-0800-000009000000}"
+     name="Display"
+-    dataDxfId="195"<calculatedColumnFormulaTRIM(SUBSTITUTE(meta_Literals[[#This
++    dataDxfId="196"<calculatedColumnFormulaTRIM(SUBSTITUTE(meta_Literals[[#This
+     id="3"
+     xr3:uid="{00000000-0010-0000-0800-000003000000}"
+     name="Name"
+-    dataDxfId="194"/<tableColumn
++    dataDxfId="195"/<tableColumn
+     id="7"
+     xr3:uid="{00000000-0010-0000-0800-000007000000}"
+     name="Parent:src"/<tableColumn
+     id="4"
+     xr3:uid="{00000000-0010-0000-0800-000004000000}"
+     name="Parent"
+-    dataDxfId="193"<calculatedColumnFormula
++    dataDxfId="194"<calculatedColumnFormula
+     xml:space="preserve"
+     =
+     "",
 ```
