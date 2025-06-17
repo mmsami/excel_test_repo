@@ -1,0 +1,70 @@
+# Changes in veri.excel/xl/tables/table6.xml
+
+```diff
+diff --git a/veri.excel/xl/tables/table6.xml b/veri.excel/xl/tables/table6.xml
+index 3710c8a..e1bfcb2 100644
+--- a/veri.excel/xl/tables/table6.xml
++++ b/veri.excel/xl/tables/table6.xml
+@@ -1,2 +1,58 @@
+ <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+-<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="8" xr:uid="{72D1D787-80C1-41B3-A5E1-361C96CBA839}" name="meta_PackageDocumentation" displayName="meta_PackageDocumentation" ref="A1:H25" totalsRowShown="0" headerRowDxfId="399" dataDxfId="397" headerRowBorderDxfId="398" tableBorderDxfId="396" totalsRowBorderDxfId="395"><autoFilter ref="A1:H25" xr:uid="{72D1D787-80C1-41B3-A5E1-361C96CBA839}"/><tableColumns count="8"><tableColumn id="1" xr3:uid="{F69362F0-9487-44C4-993A-5B2A248EFEFC}" name="ID" dataDxfId="394"/><tableColumn id="2" xr3:uid="{DEE0911D-8686-4E73-9CBA-9D80643E8EA5}" name="Kind:src" dataDxfId="393"/><tableColumn id="3" xr3:uid="{CB794C21-D1C3-48B1-8E5D-79BBADE1C529}" name="Kind" dataDxfId="392"/><tableColumn id="4" xr3:uid="{95386E7E-2DB3-484E-AA98-50A8CAD62D87}" name="Package" dataDxfId="391"/><tableColumn id="5" xr3:uid="{FC7BB08F-0ED4-4A9E-A0A1-FC8AB8C0FB4B}" name="Sub Package" dataDxfId="390"/><tableColumn id="6" xr3:uid="{2301BADC-4346-4B97-ADAA-F066AC1A9D66}" name="Topic Order" dataDxfId="389"/><tableColumn id="8" xr3:uid="{58EBC06B-6057-42D0-B230-9B5F5DEFF0AD}" name="Topic" dataDxfId="388"/><tableColumn id="9" xr3:uid="{3B170A2B-1D49-4772-8781-3E2FA0A71920}" name="Definition" dataDxfId="387"/></tableColumns><tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>
+\ No newline at end of file
++<table>
++    xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
++    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
++    mc:Ignorable="xr
++    xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
++    xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3"
++    id="8"
++    xr:uid="{72D1D787-80C1-41B3-A5E1-361C96CBA839}"
++    name="meta_PackageDocumentation"
++    displayName="meta_PackageDocumentation"
++    ref="A1:H25"
++    totalsRowShown="0"
++    headerRowDxfId="399"
++    dataDxfId="397"
++    headerRowBorderDxfId="398"
++    tableBorderDxfId="396"
++    totalsRowBorderDxfId="395"<autoFilter
++    ref="A1:H25"
++    xr:uid="{72D1D787-80C1-41B3-A5E1-361C96CBA839}"/<tableColumns
++    count="8"<tableColumn
++    id="1"
++    xr3:uid="{F69362F0-9487-44C4-993A-5B2A248EFEFC}"
++    name="ID"
++    dataDxfId="394"/<tableColumn
++    id="2"
++    xr3:uid="{DEE0911D-8686-4E73-9CBA-9D80643E8EA5}"
++    name="Kind:src"
++    dataDxfId="393"/<tableColumn
++    id="3"
++    xr3:uid="{CB794C21-D1C3-48B1-8E5D-79BBADE1C529}"
++    name="Kind"
++    dataDxfId="392"/<tableColumn
++    id="4"
++    xr3:uid="{95386E7E-2DB3-484E-AA98-50A8CAD62D87}"
++    name="Package"
++    dataDxfId="391"/<tableColumn
++    id="5"
++    xr3:uid="{FC7BB08F-0ED4-4A9E-A0A1-FC8AB8C0FB4B}"
++    name="Sub
++    dataDxfId="390"/<tableColumn
++    id="6"
++    xr3:uid="{2301BADC-4346-4B97-ADAA-F066AC1A9D66}"
++    name="Topic
++    dataDxfId="389"/<tableColumn
++    id="8"
++    xr3:uid="{58EBC06B-6057-42D0-B230-9B5F5DEFF0AD}"
++    name="Topic"
++    dataDxfId="388"/<tableColumn
++    id="9"
++    xr3:uid="{3B170A2B-1D49-4772-8781-3E2FA0A71920}"
++    name="Definition"
++    dataDxfId="387"/</tableColumns<tableStyleInfo
++    name="TableStyleLight9"
++    showFirstColumn="0"
++    showLastColumn="0"
++    showRowStripes="1"
++    showColumnStripes="0"/</table
+\ No newline at end of file
+```
