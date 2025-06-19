@@ -1,0 +1,15 @@
+# Changes in Mappe1_TestVersioning/xl/tables/table1.xml
+
+```diff
+diff --git a/Mappe1_TestVersioning/xl/tables/table1.xml b/Mappe1_TestVersioning/xl/tables/table1.xml
+new file mode 100644
+index 0000000..a0b676f
+--- /dev/null
++++ b/Mappe1_TestVersioning/xl/tables/table1.xml
+@@ -0,0 +1,4 @@
++<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
++<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="1" xr:uid="{BEED508C-C4E1-455B-A0B0-79E6469C9D9E}" name="Tabelle1" displayName="Tabelle1" ref="A1:J23" totalsRowShown="0"><autoFilter ref="A1:J23" xr:uid="{BEED508C-C4E1-455B-A0B0-79E6469C9D9E}"/><tableColumns count="10"><tableColumn id="1" xr3:uid="{7BF5FC93-81E8-4BE3-9A81-20E03A119F79}" name="C1"/><tableColumn id="2" xr3:uid="{164C8E78-FF7B-454C-B138-9A6C5A1BDCF3}" name="C2"/><tableColumn id="3" xr3:uid="{2FB74AED-C633-46E8-9020-533302EFF6F8}" name="C3"/><tableColumn id="4" xr3:uid="{8CDFB888-2DC8-422D-BC4E-C319905B6B4F}" name="C4"/><tableColumn id="5" xr3:uid="{254B5F08-E598-4A05-A1AA-939EE7B3617A}" name="C5"/><tableColumn id="6" xr3:uid="{74B48B74-0172-4EF3-B46B-484303526D5D}" name="C6"/><tableColumn id="7" xr3:uid="{AEFD3515-159F-4B7E-8C89-4E19E992556B}" name="C7"/><tableColumn id="8" xr3:uid="{ECAFD2E5-9254-4129-BF57-674C9837BBAC}" name="C8"/><tableColumn id="9" xr3:uid="{8FCA4D6E-2AFE-426C-B27C-797C27C8C6C1}" name="C9"/><tableColumn id="10" xr3:uid="{9D1950F6-01AB-4D8A-AC2A-1A304CCC78F4}" name="C10"><calculatedColumnFormula>Tabelle1[[#This Row],[C1]]&
++  Tabelle1[[#This Row],[C2]]&
++Tabelle1[[#This Row],[C3]]</calculatedColumnFormula></tableColumn></tableColumns><tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>
+\ No newline at end of file
+```
