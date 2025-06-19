@@ -70,7 +70,7 @@ def extract_excel_selective(excel_path):
     return excel_dir
 
 def format_xml_files(directory):
-    """Format XML files - IMPROVED VERSION that preserves attributes and trailing spaces"""
+    """Format XML files - Manager's improved version with formula indenting and DxfId normalization"""
     try:
         xml_count = 0
         
@@ -79,113 +79,86 @@ def format_xml_files(directory):
                 if file.endswith('.xml'):
                     file_path = os.path.join(root, file)
                     
-                    # Skip large XML files to avoid timeout
+                    # Skip large XML files
                     if os.path.getsize(file_path) > 1024 * 1024:  # 1MB limit
-                        print(f"⏭️ Skipping large XML file: {file_path}")
                         continue
                     
                     try:
                         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                             content = f.read()
                         
-                        # Entity decoding (manager's requirement for better diffs)
+                        # MANAGER'S REQUEST: Replace all DxfId="ANYNUMBER" with DxfId="0"
+                        import re
+                        content = re.sub(r'DxfId="[^"]*"', 'DxfId="0"', content)
+                        print(f"🎯 Normalized DxfId attributes in {os.path.basename(file_path)}")
+                        
+                        # Entity decoding (manager's requirement)
                         content = content.replace('&amp;', '&')
                         content = content.replace('&lt;', '<')
                         content = content.replace('&gt;', '>')
                         content = content.replace('&quot;', '"')
                         content = content.replace('&apos;', "'")
                         
-                        # IMPROVED formatting - preserves attributes and trailing spaces
+                        # Enhanced formatting that preserves formula indenting
                         lines = content.split('\n')
                         formatted_lines = []
                         indent_level = 0
+                        inside_formula = False
                         
                         for line in lines:
-                            # DON'T strip() - preserve leading/trailing spaces!
-                            original_line = line
                             stripped = line.strip()
+                            original_line = line  # Keep original for formula content
                             
-                            # Skip completely empty lines
                             if not stripped:
-                                formatted_lines.append('')  # Keep empty line structure
                                 continue
                             
-                            # XML declaration - keep as-is
-                            if stripped.startswith('<?'):
-                                formatted_lines.append(stripped)
+                            # Check if we're entering or leaving formula content
+                            if '<calculatedColumnFormula>' in stripped or '<formula>' in stripped:
+                                inside_formula = True
+                            elif '</calculatedColumnFormula>' in stripped or '</formula>' in stripped:
+                                inside_formula = False
+                            
+                            # MANAGER'S REQUEST: Preserve indenting in formulas
+                            if inside_formula and not stripped.startswith('<') and not stripped.endswith('>'):
+                                # Keep original indentation for formula content
+                                formatted_lines.append(original_line.rstrip())  # Remove trailing spaces but keep leading
                                 continue
                             
+                            # Regular XML formatting for non-formula content
                             # Closing tags
                             if stripped.startswith('</'):
                                 indent_level = max(0, indent_level - 1)
                                 formatted_lines.append('    ' * indent_level + stripped)
-                                continue
-                            
-                            # Self-closing tags with attributes
-                            if stripped.endswith('/>'):
-                                # Check if tag has attributes
-                                if ' ' in stripped and '=' in stripped:
-                                    # Break attributes onto separate lines
-                                    tag_parts = stripped.split(' ', 1)
-                                    tag_name = tag_parts[0]
-                                    attributes = tag_parts[1] if len(tag_parts) > 1 else ''
-                                    
-                                    formatted_lines.append('    ' * indent_level + tag_name)
-                                    
-                                    # Split attributes - preserve spaces around =
-                                    attr_parts = attributes.replace('/>', '').split(' ')
-                                    for attr in attr_parts:
-                                        if '=' in attr and attr.strip():
-                                            formatted_lines.append('    ' * (indent_level + 1) + attr.strip())
-                                    
-                                    formatted_lines.append('    ' * indent_level + '/>')
-                                else:
-                                    formatted_lines.append('    ' * indent_level + stripped)
-                                continue
-                            
+                            # Self-closing tags
+                            elif stripped.endswith('/>'):
+                                formatted_lines.append('    ' * indent_level + stripped)
                             # Opening tags
-                            if stripped.startswith('<') and not stripped.startswith('<?'):
-                                # Check if tag has attributes
-                                if ' ' in stripped and '=' in stripped and not stripped.endswith('/>'):
-                                    # Break attributes onto separate lines
-                                    tag_parts = stripped.split(' ', 1)
-                                    tag_name = tag_parts[0]
-                                    attributes = tag_parts[1] if len(tag_parts) > 1 else ''
-                                    
-                                    formatted_lines.append('    ' * indent_level + tag_name + '>')
-                                    
-                                    # Split attributes - preserve spaces
-                                    attr_parts = attributes.replace('>', '').split(' ')
-                                    for attr in attr_parts:
-                                        if '=' in attr and attr.strip():
-                                            formatted_lines.append('    ' * (indent_level + 1) + attr.strip())
-                                    
+                            elif stripped.startswith('<') and not stripped.startswith('<?'):
+                                formatted_lines.append('    ' * indent_level + stripped)
+                                if not stripped.endswith('/>'):
                                     indent_level += 1
+                            # XML declaration
+                            elif stripped.startswith('<?'):
+                                formatted_lines.append(stripped)
+                            # Content (preserves formula newlines and indentation)
+                            else:
+                                if inside_formula:
+                                    # Preserve original indentation for formula content
+                                    formatted_lines.append(original_line.rstrip())
                                 else:
-                                    formatted_lines.append('    ' * indent_level + stripped)
-                                    if not stripped.endswith('/>'):
-                                        indent_level += 1
-                                continue
-                            
-                            # Content - preserve ALL spaces (including trailing)
-                            if original_line.strip():  # Only if there's actual content
-                                # Keep original spacing but add proper indentation
-                                content_text = original_line.strip()
-                                # Preserve trailing spaces by using original line
-                                trailing_spaces = len(original_line) - len(original_line.rstrip())
-                                formatted_lines.append('    ' * indent_level + content_text + ' ' * trailing_spaces)
+                                    # Normal content without extra indentation
+                                    formatted_lines.append(stripped)
                         
-                        # Write back with preserved formatting
                         with open(file_path, 'w', encoding='utf-8') as f:
                             f.write('\n'.join(formatted_lines))
                         
                         xml_count += 1
                     except Exception as e:
-                        print(f"⚠️ Error formatting {file_path}: {e}")
+                        print(f"Error formatting {file_path}: {e}")
         
-        print(f"✅ Formatted {xml_count} XML files with preserved attributes and spaces")
+        print(f"✅ Formatted {xml_count} XML files with formula indenting and DxfId normalization")
     except Exception as e:
-        print(f"⚠️ XML formatting failed - {e}")
+        print(f"Warning: XML formatting failed - {e}")
 
 def package_xml_to_excel(xml_dir):
     """Package XML directory back to Excel file"""
