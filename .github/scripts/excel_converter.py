@@ -64,7 +64,7 @@ def extract_excel_selective(excel_path):
     return excel_dir
 
 def format_xml_files(directory):
-    """Format XML files - Manager's exact requirements: DxfId removal + specific newlines"""
+    """Format XML files - PRESERVE FORMULA INDENTATION as manager requested"""
     try:
         xml_count = 0
         
@@ -97,10 +97,10 @@ def format_xml_files(directory):
                         content = content.replace('&quot;', '"')
                         content = content.replace('&apos;', "'")
                         
-                        # MANAGER'S REQUIREMENT 2: Specific newline placements
-                        content = add_manager_newlines(content)
+                        # MANAGER'S REQUIREMENT 2: Specific newlines + PRESERVE INDENTATION
+                        content = add_manager_newlines_preserve_indentation(content)
                         
-                        # Basic XML formatting
+                        # SIMPLIFIED XML formatting - DON'T STRIP CONTENT INDENTATION
                         lines = content.split('\n')
                         formatted_lines = []
                         indent_level = 0
@@ -110,6 +110,11 @@ def format_xml_files(directory):
                             
                             if not stripped:
                                 continue
+                            
+                            # Check if this line is inside a formula tag
+                            is_formula_content = (not stripped.startswith('<') and 
+                                                not stripped.startswith('<?') and
+                                                any(tag in line for tag in ['calculatedColumnFormula>', 'formula>']))
                             
                             # Closing tags
                             if stripped.startswith('</'):
@@ -126,8 +131,12 @@ def format_xml_files(directory):
                             # XML declaration
                             elif stripped.startswith('<?'):
                                 formatted_lines.append(stripped)
-                            # Content
+                            # Content - PRESERVE FORMULA INDENTATION
+                            elif is_formula_content:
+                                # For formula content, preserve the original line spacing
+                                formatted_lines.append(line.rstrip())  # Remove only trailing spaces
                             else:
+                                # For other content, use normal indentation
                                 formatted_lines.append('    ' * indent_level + stripped)
                         
                         with open(file_path, 'w', encoding='utf-8') as f:
@@ -137,46 +146,52 @@ def format_xml_files(directory):
                     except Exception as e:
                         print(f"Error formatting {file_path}: {e}")
         
-        print(f"✅ Formatted {xml_count} XML files with DxfId removal and manager's newlines")
+        print(f"✅ Formatted {xml_count} XML files with DxfId removal and preserved formula indentation")
     except Exception as e:
         print(f"Warning: XML formatting failed - {e}")
 
-def add_manager_newlines(content):
-    """Add newlines at manager's specific locations"""
+def add_manager_newlines_preserve_indentation(content):
+    """Add newlines at manager's specific locations while preserving formula indentation"""
     import re
     
-    # MANAGER'S REQUIREMENT: Add newlines at specific places
+    def fix_formula_tag_preserve_indent(match):
+        tag_name = match.group(1)  # calculatedColumnFormula or formula
+        formula_content = match.group(2)
+        
+        # MANAGER'S REQUEST: Preserve the original indentation in formulas
+        # Don't strip leading spaces - keep them exactly as they were
+        formula_lines = []
+        for line in formula_content.split('\n'):
+            if line.strip():  # Only keep non-empty lines
+                formula_lines.append(line.rstrip())  # Remove trailing spaces but KEEP leading spaces
+        
+        if not formula_lines:
+            return f"<{tag_name}></{tag_name}>"
+        
+        # Join with newlines but preserve the original indentation
+        formatted_formula = '\n'.join(formula_lines)
+        
+        return f"<{tag_name}>\n{formatted_formula}\n</{tag_name}>"
     
-    # 1. After <calculatedColumnFormula> (note: manager wrote "calculateColumnFormula" but meant "calculatedColumnFormula")
+    # Apply to calculatedColumnFormula tags - PRESERVE INDENTATION
     content = re.sub(
-        r'(<calculatedColumnFormula>)([^\n])',
-        r'\1\n\2',
-        content
+        r'<(calculatedColumnFormula)>(.*?)</\1>',
+        fix_formula_tag_preserve_indent,
+        content,
+        flags=re.DOTALL
     )
     
-    # 2. Before </calculatedColumnFormula> (note: manager wrote "calculatedColumnFormulas" but meant "calculatedColumnFormula")
+    # Apply to regular formula tags - PRESERVE INDENTATION
     content = re.sub(
-        r'([^\n])(</calculatedColumnFormula>)',
-        r'\1\n\2',
-        content
+        r'<(formula)>(.*?)</\1>',
+        fix_formula_tag_preserve_indent,
+        content,
+        flags=re.DOTALL
     )
     
-    # 3. Before <tableColumn>
+    # Add newlines before <tableColumn> tags
     content = re.sub(
         r'([^\n])(<tableColumn)',
-        r'\1\n\2',
-        content
-    )
-    
-    # Also handle regular <formula> tags the same way for consistency
-    content = re.sub(
-        r'(<formula>)([^\n])',
-        r'\1\n\2',
-        content
-    )
-    
-    content = re.sub(
-        r'([^\n])(</formula>)',
         r'\1\n\2',
         content
     )
