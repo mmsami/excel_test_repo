@@ -15,7 +15,7 @@ import time  # ADD THIS MISSING IMPORT
 from pathlib import Path
 
 def extract_excel_selective(excel_path):
-    """Extract only VBA, table definitions, and structure from Excel file"""
+    """Extract only VBA and table definitions from Excel file - MANAGER'S FINAL VERSION"""
     excel_dir = Path(excel_path).with_suffix('')
     
     # Create directory if it doesn't exist
@@ -48,20 +48,14 @@ def extract_excel_selective(excel_path):
                 os.makedirs(dst.parent, exist_ok=True)
                 shutil.copy2(src, dst)
     
-    # Copy table definitions
+    # MANAGER'S REQUEST: Copy ONLY table definitions (skip styles.xml and workbook.xml)
     tables_dir = temp_dir / 'xl/tables'
     if tables_dir.exists():
         dst_tables = excel_dir / 'xl/tables'
         shutil.copytree(tables_dir, dst_tables, dirs_exist_ok=True)
     
-    # Copy workbook structure (no worksheet data)
-    workbook_files = ['xl/workbook.xml', 'xl/styles.xml', 'xl/_rels/workbook.xml.rels']
-    for wb_file in workbook_files:
-        src = temp_dir / wb_file
-        if src.exists():
-            dst = excel_dir / wb_file
-            os.makedirs(dst.parent, exist_ok=True)
-            shutil.copy2(src, dst)
+    # REMOVED: workbook.xml and styles.xml (manager doesn't need them)
+    # workbook_files = ['xl/workbook.xml', 'xl/styles.xml', 'xl/_rels/workbook.xml.rels']
     
     # Clean up temp directory
     shutil.rmtree(temp_dir)
