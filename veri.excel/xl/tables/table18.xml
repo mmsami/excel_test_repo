@@ -1,49 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<table>
-    xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="xr
-    xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
-    xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3"
-    id="13"
-    xr:uid="{5FE82748-FB58-403F-9E1F-7784742F26DB}"
-    name="myxyzpackage_MyXYZ_Objects"
-    displayName="myxyzpackage_MyXYZ_Objects"
-    ref="C6:K10"
-    totalsRowShown="0"
-    headerRowDxfId="1"<autoFilter
-    ref="C6:K10"
-    xr:uid="{5FE82748-FB58-403F-9E1F-7784742F26DB}"/<tableColumns
-    count="9"<tableColumn
-    id="1"
-    xr3:uid="{8AB7F535-90F6-4711-BF14-D0D7987BDD7C}"
-    name="ID"/<tableColumn
-    id="9"
-    xr3:uid="{2C859E15-E6C1-49E2-893A-9C5DCC6209ED}"
-    name="Kind:src"/<tableColumn
-    id="2"
-    xr3:uid="{587FCA75-3CD1-4FA4-87BD-1CB9BD033EF3}"
-    name="Kind"/<tableColumn
-    id="3"
-    xr3:uid="{12C9DB65-2E31-462F-BF67-4B1D73850974}"
-    name="Package"/<tableColumn
-    id="4"
-    xr3:uid="{0035E8CF-C5FF-4B1C-8AE4-8998595836D1}"
-    name="Sub
-    id="5"
-    xr3:uid="{9C67959F-1BB4-4E39-A8E9-E74A3B10B124}"
-    name="Display:q"/<tableColumn
-    id="6"
-    xr3:uid="{7598D3F1-E67A-4462-A267-4C8B842DBD46}"
-    name="Display"/<tableColumn
-    id="7"
-    xr3:uid="{84B00812-B7CB-451E-B6BD-A81A0B0B5423}"
-    name="My
-    id="8"
-    xr3:uid="{27BF9B98-EA16-4CAE-A40F-692E5DE02CCE}"
-    name="Definition"/</tableColumns<tableStyleInfo
-    name="TableStyleLight9"
-    showFirstColumn="0"
-    showLastColumn="0"
-    showRowStripes="1"
-    showColumnStripes="0"/</table
+<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="13" xr:uid="{5FE82748-FB58-403F-9E1F-7784742F26DB}" name="myxyzpackage_MyXYZ_Objects" displayName="myxyzpackage_MyXYZ_Objects" ref="C6:K10" totalsRowShown="0" headerRowDxfId="0"><autoFilter ref="C6:K10" xr:uid="{5FE82748-FB58-403F-9E1F-7784742F26DB}"/>
+<tableColumns count="9">
+    <tableColumn id="1" xr3:uid="{8AB7F535-90F6-4711-BF14-D0D7987BDD7C}" name="ID"/>
+    <tableColumn id="9" xr3:uid="{2C859E15-E6C1-49E2-893A-9C5DCC6209ED}" name="Kind:src"/>
+    <tableColumn id="2" xr3:uid="{587FCA75-3CD1-4FA4-87BD-1CB9BD033EF3}" name="Kind"/>
+    <tableColumn id="3" xr3:uid="{12C9DB65-2E31-462F-BF67-4B1D73850974}" name="Package"/>
+    <tableColumn id="4" xr3:uid="{0035E8CF-C5FF-4B1C-8AE4-8998595836D1}" name="Sub Package"/>
+    <tableColumn id="5" xr3:uid="{9C67959F-1BB4-4E39-A8E9-E74A3B10B124}" name="Display:q"/>
+    <tableColumn id="6" xr3:uid="{7598D3F1-E67A-4462-A267-4C8B842DBD46}" name="Display"/>
+    <tableColumn id="7" xr3:uid="{84B00812-B7CB-451E-B6BD-A81A0B0B5423}" name="My XYZ Column"/>
+    <tableColumn id="8" xr3:uid="{27BF9B98-EA16-4CAE-A40F-692E5DE02CCE}" name="Definition"/></tableColumns><tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>

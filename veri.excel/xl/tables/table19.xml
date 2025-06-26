@@ -1,39 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<table>
-    xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="xr
-    xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
-    xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3"
-    id="19"
-    xr:uid="{D94ACDF1-8B9C-4146-9658-B48D1A5D4E4F}"
-    name="meta_SimpleTestPattern"
-    displayName="meta_SimpleTestPattern"
-    ref="A1:F6"
-    totalsRowShown="0"<autoFilter
-    ref="A1:F6"
-    xr:uid="{DE81D584-781D-5B4D-AE74-678F1631F9EF}"/<tableColumns
-    count="6"<tableColumn
-    id="1"
-    xr3:uid="{753D2FC2-3454-D64B-A350-598E906A9E9B}"
-    name="ID"/<tableColumn
-    id="2"
-    xr3:uid="{ACB4C01E-FDA3-EB46-BBBA-4FEC21830EB6}"
-    name="Filter1"/<tableColumn
-    id="6"
-    xr3:uid="{437F09AC-C381-7042-9CCF-F769498276A4}"
-    name="Filter2"/<tableColumn
-    id="3"
-    xr3:uid="{EA277429-6A9A-224D-A11F-228DFEC721FD}"
-    name="Order"/<tableColumn
-    id="4"
-    xr3:uid="{9CD06F2D-54E2-2144-BC40-52F5878CF95D}"
-    name="Template"/<tableColumn
-    id="5"
-    xr3:uid="{23F2823C-9678-6543-9CC3-C46BD97C721C}"
-    name="Other"/</tableColumns<tableStyleInfo
-    name="TableStyleLight9"
-    showFirstColumn="0"
-    showLastColumn="0"
-    showRowStripes="1"
-    showColumnStripes="0"/</table
+<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="19" xr:uid="{D94ACDF1-8B9C-4146-9658-B48D1A5D4E4F}" name="meta_SimpleTestPattern" displayName="meta_SimpleTestPattern" ref="A1:F6" totalsRowShown="0"><autoFilter ref="A1:F6" xr:uid="{DE81D584-781D-5B4D-AE74-678F1631F9EF}"/>
+<tableColumns count="6">
+    <tableColumn id="1" xr3:uid="{753D2FC2-3454-D64B-A350-598E906A9E9B}" name="ID"/>
+    <tableColumn id="2" xr3:uid="{ACB4C01E-FDA3-EB46-BBBA-4FEC21830EB6}" name="Filter1"/>
+    <tableColumn id="6" xr3:uid="{437F09AC-C381-7042-9CCF-F769498276A4}" name="Filter2"/>
+    <tableColumn id="3" xr3:uid="{EA277429-6A9A-224D-A11F-228DFEC721FD}" name="Order"/>
+    <tableColumn id="4" xr3:uid="{9CD06F2D-54E2-2144-BC40-52F5878CF95D}" name="Template"/>
+    <tableColumn id="5" xr3:uid="{23F2823C-9678-6543-9CC3-C46BD97C721C}" name="Other"/></tableColumns><tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>
