@@ -7,7 +7,7 @@
     <tableColumn id="4" xr3:uid="{00000000-0010-0000-0A00-000004000000}" name="Package"/>
     <tableColumn id="11" xr3:uid="{40477CE1-1F72-4803-929E-82F47D9A1D3B}" name="Sub Package"/>
     <tableColumn id="5" xr3:uid="{00000000-0010-0000-0A00-000005000000}" name="T2 Name"/>
-    <tableColumn id="6" xr3:uid="{00000000-0010-0000-0A00-000006000000}" name="T2 Name:q" dataDxfId="1"><calculatedColumnFormula>
+    <tableColumn id="6" xr3:uid="{00000000-0010-0000-0A00-000006000000}" name="T2 Name:q" dataDxfId="2"><calculatedColumnFormula>
         IF(
         TRIM(belowred_Table2Rows[[#This Row],[Package]])="",
         "",
