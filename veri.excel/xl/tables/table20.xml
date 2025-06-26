@@ -1,30 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<table>
-    xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="xr
-    xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
-    xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3"
-    id="37"
-    xr:uid="{E746125F-CC51-F044-95CB-5C264211A3B7}"
-    name="test_NewTable"
-    displayName="test_NewTable"
-    ref="A1:C3"
-    totalsRowShown="0"<autoFilter
-    ref="A1:C3"
-    xr:uid="{E746125F-CC51-F044-95CB-5C264211A3B7}"/<tableColumns
-    count="3"<tableColumn
-    id="1"
-    xr3:uid="{10925867-2FC3-9545-BFC6-6EC1CB5F9BEF}"
-    name="ID"/<tableColumn
-    id="2"
-    xr3:uid="{470E61E4-F8E5-3545-8F57-D81205558317}"
-    name="Test
-    id="3"
-    xr3:uid="{2129436D-82A2-9A47-A857-80F9C06380FF}"
-    name="Test
-    name="TableStyleMedium2"
-    showFirstColumn="0"
-    showLastColumn="0"
-    showRowStripes="1"
-    showColumnStripes="0"/</table
+<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="37" xr:uid="{E746125F-CC51-F044-95CB-5C264211A3B7}" name="test_NewTable" displayName="test_NewTable" ref="A1:C3" totalsRowShown="0"><autoFilter ref="A1:C3" xr:uid="{E746125F-CC51-F044-95CB-5C264211A3B7}"/>
+<tableColumns count="3">
+    <tableColumn id="1" xr3:uid="{10925867-2FC3-9545-BFC6-6EC1CB5F9BEF}" name="ID"/>
+    <tableColumn id="2" xr3:uid="{470E61E4-F8E5-3545-8F57-D81205558317}" name="Test 1"/>
+    <tableColumn id="3" xr3:uid="{2129436D-82A2-9A47-A857-80F9C06380FF}" name="Test 2"/></tableColumns><tableStyleInfo name="TableStyleMedium2" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>
