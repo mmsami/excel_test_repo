@@ -2,149 +2,62 @@
 
 ```diff
 diff --git a/veri.excel/xl/tables/table14.xml b/veri.excel/xl/tables/table14.xml
-index 6c2cd66..f130550 100644
+index f130550..77e79bf 100644
 --- a/veri.excel/xl/tables/table14.xml
 +++ b/veri.excel/xl/tables/table14.xml
-@@ -1,110 +1,30 @@
+@@ -1,30 +1,30 @@
  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
--<table>
--    xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
--    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
--    mc:Ignorable="xr
--    xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
--    xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3"
--    id="17"
--    xr:uid="{00000000-000C-0000-FFFF-FFFF06000000}"
--    name="meta_TablePatterns"
--    displayName="meta_TablePatterns"
--    ref="A2:U4"
--    totalsRowShown="0"
--    headerRowDxfId="82"
--    dataDxfId="80"
--    headerRowBorderDxfId="81"<autoFilter
--    ref="A2:U4"
--    xr:uid="{00000000-0009-0000-0100-000011000000}"/<tableColumns
--    count="21"<tableColumn
--    id="1"
--    xr3:uid="{00000000-0010-0000-0600-000001000000}"
--    name="ID"
--    dataDxfId="79"/<tableColumn
--    id="12"
--    xr3:uid="{00000000-0010-0000-0600-00000C000000}"
--    name="Kind:src"
--    dataDxfId="78"/<tableColumn
--    id="3"
--    xr3:uid="{00000000-0010-0000-0600-000003000000}"
--    name="Kind"
--    dataDxfId="77"<calculatedColumnFormulaIF(meta_TablePatterns[[#This
--    Row],[Kind:src]]="","",INDEX(meta_Classifiers[Display
--    id="6"
--    xr3:uid="{00000000-0010-0000-0600-000006000000}"
--    name="Package"
--    dataDxfId="76"/<tableColumn
--    id="11"
--    xr3:uid="{00000000-0010-0000-0600-00000B000000}"
--    name="Sub
--    dataDxfId="75"/<tableColumn
--    id="8"
--    xr3:uid="{00000000-0010-0000-0600-000008000000}"
--    name="Display:q"
--    dataDxfId="74"<calculatedColumnFormulaIF(TRIM(meta_TablePatterns[[#This
--    Row],[Package]])="","",TRIM(LOWER(meta_TablePatterns[[#This
--    id="7"
--    xr3:uid="{00000000-0010-0000-0600-000007000000}"
--    name="Display"
--    dataDxfId="73"<calculatedColumnFormulaTRIM(SUBSTITUTE(meta_TablePatterns[[#This
--    id="2"
--    xr3:uid="{00000000-0010-0000-0600-000002000000}"
--    name="Name"
--    dataDxfId="72"/<tableColumn
--    id="18"
--    xr3:uid="{00000000-0010-0000-0600-000012000000}"
--    name="Source
--    dataDxfId="71"/<tableColumn
--    id="4"
--    xr3:uid="{00000000-0010-0000-0600-000004000000}"
--    name="Match
--    dataDxfId="70"/<tableColumn
--    id="9"
--    xr3:uid="{00000000-0010-0000-0600-000009000000}"
--    name="Match
--    dataDxfId="69"/<tableColumn
--    id="17"
--    xr3:uid="{00000000-0010-0000-0600-000011000000}"
--    name="Match
--    dataDxfId="68"/<tableColumn
--    id="16"
--    xr3:uid="{00000000-0010-0000-0600-000010000000}"
--    name="Match
--    dataDxfId="67"/<tableColumn
--    id="15"
--    xr3:uid="{00000000-0010-0000-0600-00000F000000}"
--    name="Match
--    dataDxfId="66"/<tableColumn
--    id="14"
--    xr3:uid="{00000000-0010-0000-0600-00000E000000}"
--    name="Match
--    dataDxfId="65"/<tableColumn
--    id="13"
--    xr3:uid="{00000000-0010-0000-0600-00000D000000}"
--    name="Match
--    dataDxfId="64"/<tableColumn
--    id="19"
--    xr3:uid="{00000000-0010-0000-0600-000013000000}"
--    name="Order
--    dataDxfId="63"/<tableColumn
--    id="22"
--    xr3:uid="{00000000-0010-0000-0600-000016000000}"
--    name="Template
--    dataDxfId="62"/<tableColumn
--    id="21"
--    xr3:uid="{00000000-0010-0000-0600-000015000000}"
--    name="Template
--    dataDxfId="61"/<tableColumn
--    id="20"
--    xr3:uid="{00000000-0010-0000-0600-000014000000}"
--    name="Template
--    dataDxfId="60"/<tableColumn
--    id="5"
--    xr3:uid="{00000000-0010-0000-0600-000005000000}"
--    name="Definition"
--    dataDxfId="59"/</tableColumns<tableStyleInfo
--    name="TableStyleLight9"
--    showFirstColumn="0"
--    showLastColumn="0"
--    showRowStripes="1"
--    showColumnStripes="0"/</table
+-<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="17" xr:uid="{00000000-000C-0000-FFFF-FFFF06000000}" name="meta_TablePatterns" displayName="meta_TablePatterns" ref="A2:U4" totalsRowShown="0" headerRowDxfId="81" dataDxfId="79" headerRowBorderDxfId="80"><autoFilter ref="A2:U4" xr:uid="{00000000-0009-0000-0100-000011000000}"/>
++<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="17" xr:uid="{00000000-000C-0000-FFFF-FFFF06000000}" name="meta_TablePatterns" displayName="meta_TablePatterns" ref="A2:U4" totalsRowShown="0" headerRowDxfId="82" dataDxfId="80" headerRowBorderDxfId="81"><autoFilter ref="A2:U4" xr:uid="{00000000-0009-0000-0100-000011000000}"/>
+ <tableColumns count="21">
+-    <tableColumn id="1" xr3:uid="{00000000-0010-0000-0600-000001000000}" name="ID" dataDxfId="78"/>
+-    <tableColumn id="12" xr3:uid="{00000000-0010-0000-0600-00000C000000}" name="Kind:src" dataDxfId="77"/>
+-    <tableColumn id="3" xr3:uid="{00000000-0010-0000-0600-000003000000}" name="Kind" dataDxfId="76"><calculatedColumnFormula>
++    <tableColumn id="1" xr3:uid="{00000000-0010-0000-0600-000001000000}" name="ID" dataDxfId="79"/>
++    <tableColumn id="12" xr3:uid="{00000000-0010-0000-0600-00000C000000}" name="Kind:src" dataDxfId="78"/>
++    <tableColumn id="3" xr3:uid="{00000000-0010-0000-0600-000003000000}" name="Kind" dataDxfId="77"><calculatedColumnFormula>
+         IF(meta_TablePatterns[[#This Row],[Kind:src]]="","",INDEX(meta_Classifiers[Display Qualified],MATCH(meta_TablePatterns[[#This Row],[Kind:src]],meta_Classifiers[ID],0)))
+     </calculatedColumnFormula></tableColumn>
+-    <tableColumn id="6" xr3:uid="{00000000-0010-0000-0600-000006000000}" name="Package" dataDxfId="75"/>
+-    <tableColumn id="11" xr3:uid="{00000000-0010-0000-0600-00000B000000}" name="Sub Package" dataDxfId="74"/>
+-    <tableColumn id="8" xr3:uid="{00000000-0010-0000-0600-000008000000}" name="Display:q" dataDxfId="73"><calculatedColumnFormula>
++    <tableColumn id="6" xr3:uid="{00000000-0010-0000-0600-000006000000}" name="Package" dataDxfId="76"/>
++    <tableColumn id="11" xr3:uid="{00000000-0010-0000-0600-00000B000000}" name="Sub Package" dataDxfId="75"/>
++    <tableColumn id="8" xr3:uid="{00000000-0010-0000-0600-000008000000}" name="Display:q" dataDxfId="74"><calculatedColumnFormula>
+         IF(TRIM(meta_TablePatterns[[#This Row],[Package]])="","",TRIM(LOWER(meta_TablePatterns[[#This Row],[Package]]))&"::")&meta_TablePatterns[[#This Row],[Display]]
+     </calculatedColumnFormula></tableColumn>
+-    <tableColumn id="7" xr3:uid="{00000000-0010-0000-0600-000007000000}" name="Display" dataDxfId="72"><calculatedColumnFormula>
++    <tableColumn id="7" xr3:uid="{00000000-0010-0000-0600-000007000000}" name="Display" dataDxfId="73"><calculatedColumnFormula>
+         TRIM(SUBSTITUTE(meta_TablePatterns[[#This Row],[Name]]," ",""))
+     </calculatedColumnFormula></tableColumn>
+-    <tableColumn id="2" xr3:uid="{00000000-0010-0000-0600-000002000000}" name="Name" dataDxfId="71"/>
+-    <tableColumn id="18" xr3:uid="{00000000-0010-0000-0600-000012000000}" name="Source Table" dataDxfId="70"/>
+-    <tableColumn id="4" xr3:uid="{00000000-0010-0000-0600-000004000000}" name="Match Filter Column 1" dataDxfId="69"/>
+-    <tableColumn id="9" xr3:uid="{00000000-0010-0000-0600-000009000000}" name="Match Filter Column 2" dataDxfId="68"/>
+-    <tableColumn id="17" xr3:uid="{00000000-0010-0000-0600-000011000000}" name="Match Key Column 1" dataDxfId="67"/>
+-    <tableColumn id="16" xr3:uid="{00000000-0010-0000-0600-000010000000}" name="Match Key Column 2" dataDxfId="66"/>
+-    <tableColumn id="15" xr3:uid="{00000000-0010-0000-0600-00000F000000}" name="Match Key Column 3" dataDxfId="65"/>
+-    <tableColumn id="14" xr3:uid="{00000000-0010-0000-0600-00000E000000}" name="Match Key Column 4" dataDxfId="64"/>
+-    <tableColumn id="13" xr3:uid="{00000000-0010-0000-0600-00000D000000}" name="Match Key Column 5" dataDxfId="63"/>
+-    <tableColumn id="19" xr3:uid="{00000000-0010-0000-0600-000013000000}" name="Order Column" dataDxfId="62"/>
+-    <tableColumn id="22" xr3:uid="{00000000-0010-0000-0600-000016000000}" name="Template Parameter Column 1" dataDxfId="61"/>
+-    <tableColumn id="21" xr3:uid="{00000000-0010-0000-0600-000015000000}" name="Template Parameter Column 2" dataDxfId="60"/>
+-    <tableColumn id="20" xr3:uid="{00000000-0010-0000-0600-000014000000}" name="Template Parameter Column 3" dataDxfId="59"/>
+-    <tableColumn id="5" xr3:uid="{00000000-0010-0000-0600-000005000000}" name="Definition" dataDxfId="58"/></tableColumns><tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>
 \ No newline at end of file
-+<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="xr xr3" xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision" xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" id="17" xr:uid="{00000000-000C-0000-FFFF-FFFF06000000}" name="meta_TablePatterns" displayName="meta_TablePatterns" ref="A2:U4" totalsRowShown="0" headerRowDxfId="81" dataDxfId="79" headerRowBorderDxfId="80"><autoFilter ref="A2:U4" xr:uid="{00000000-0009-0000-0100-000011000000}"/>
-+<tableColumns count="21">
-+    <tableColumn id="1" xr3:uid="{00000000-0010-0000-0600-000001000000}" name="ID" dataDxfId="78"/>
-+    <tableColumn id="12" xr3:uid="{00000000-0010-0000-0600-00000C000000}" name="Kind:src" dataDxfId="77"/>
-+    <tableColumn id="3" xr3:uid="{00000000-0010-0000-0600-000003000000}" name="Kind" dataDxfId="76"><calculatedColumnFormula>
-+        IF(meta_TablePatterns[[#This Row],[Kind:src]]="","",INDEX(meta_Classifiers[Display Qualified],MATCH(meta_TablePatterns[[#This Row],[Kind:src]],meta_Classifiers[ID],0)))
-+    </calculatedColumnFormula></tableColumn>
-+    <tableColumn id="6" xr3:uid="{00000000-0010-0000-0600-000006000000}" name="Package" dataDxfId="75"/>
-+    <tableColumn id="11" xr3:uid="{00000000-0010-0000-0600-00000B000000}" name="Sub Package" dataDxfId="74"/>
-+    <tableColumn id="8" xr3:uid="{00000000-0010-0000-0600-000008000000}" name="Display:q" dataDxfId="73"><calculatedColumnFormula>
-+        IF(TRIM(meta_TablePatterns[[#This Row],[Package]])="","",TRIM(LOWER(meta_TablePatterns[[#This Row],[Package]]))&"::")&meta_TablePatterns[[#This Row],[Display]]
-+    </calculatedColumnFormula></tableColumn>
-+    <tableColumn id="7" xr3:uid="{00000000-0010-0000-0600-000007000000}" name="Display" dataDxfId="72"><calculatedColumnFormula>
-+        TRIM(SUBSTITUTE(meta_TablePatterns[[#This Row],[Name]]," ",""))
-+    </calculatedColumnFormula></tableColumn>
-+    <tableColumn id="2" xr3:uid="{00000000-0010-0000-0600-000002000000}" name="Name" dataDxfId="71"/>
-+    <tableColumn id="18" xr3:uid="{00000000-0010-0000-0600-000012000000}" name="Source Table" dataDxfId="70"/>
-+    <tableColumn id="4" xr3:uid="{00000000-0010-0000-0600-000004000000}" name="Match Filter Column 1" dataDxfId="69"/>
-+    <tableColumn id="9" xr3:uid="{00000000-0010-0000-0600-000009000000}" name="Match Filter Column 2" dataDxfId="68"/>
-+    <tableColumn id="17" xr3:uid="{00000000-0010-0000-0600-000011000000}" name="Match Key Column 1" dataDxfId="67"/>
-+    <tableColumn id="16" xr3:uid="{00000000-0010-0000-0600-000010000000}" name="Match Key Column 2" dataDxfId="66"/>
-+    <tableColumn id="15" xr3:uid="{00000000-0010-0000-0600-00000F000000}" name="Match Key Column 3" dataDxfId="65"/>
-+    <tableColumn id="14" xr3:uid="{00000000-0010-0000-0600-00000E000000}" name="Match Key Column 4" dataDxfId="64"/>
-+    <tableColumn id="13" xr3:uid="{00000000-0010-0000-0600-00000D000000}" name="Match Key Column 5" dataDxfId="63"/>
-+    <tableColumn id="19" xr3:uid="{00000000-0010-0000-0600-000013000000}" name="Order Column" dataDxfId="62"/>
-+    <tableColumn id="22" xr3:uid="{00000000-0010-0000-0600-000016000000}" name="Template Parameter Column 1" dataDxfId="61"/>
-+    <tableColumn id="21" xr3:uid="{00000000-0010-0000-0600-000015000000}" name="Template Parameter Column 2" dataDxfId="60"/>
-+    <tableColumn id="20" xr3:uid="{00000000-0010-0000-0600-000014000000}" name="Template Parameter Column 3" dataDxfId="59"/>
-+    <tableColumn id="5" xr3:uid="{00000000-0010-0000-0600-000005000000}" name="Definition" dataDxfId="58"/></tableColumns><tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>
++    <tableColumn id="2" xr3:uid="{00000000-0010-0000-0600-000002000000}" name="Name" dataDxfId="72"/>
++    <tableColumn id="18" xr3:uid="{00000000-0010-0000-0600-000012000000}" name="Source Table" dataDxfId="71"/>
++    <tableColumn id="4" xr3:uid="{00000000-0010-0000-0600-000004000000}" name="Match Filter Column 1" dataDxfId="70"/>
++    <tableColumn id="9" xr3:uid="{00000000-0010-0000-0600-000009000000}" name="Match Filter Column 2" dataDxfId="69"/>
++    <tableColumn id="17" xr3:uid="{00000000-0010-0000-0600-000011000000}" name="Match Key Column 1" dataDxfId="68"/>
++    <tableColumn id="16" xr3:uid="{00000000-0010-0000-0600-000010000000}" name="Match Key Column 2" dataDxfId="67"/>
++    <tableColumn id="15" xr3:uid="{00000000-0010-0000-0600-00000F000000}" name="Match Key Column 3" dataDxfId="66"/>
++    <tableColumn id="14" xr3:uid="{00000000-0010-0000-0600-00000E000000}" name="Match Key Column 4" dataDxfId="65"/>
++    <tableColumn id="13" xr3:uid="{00000000-0010-0000-0600-00000D000000}" name="Match Key Column 5" dataDxfId="64"/>
++    <tableColumn id="19" xr3:uid="{00000000-0010-0000-0600-000013000000}" name="Order Column" dataDxfId="63"/>
++    <tableColumn id="22" xr3:uid="{00000000-0010-0000-0600-000016000000}" name="Template Parameter Column 1" dataDxfId="62"/>
++    <tableColumn id="21" xr3:uid="{00000000-0010-0000-0600-000015000000}" name="Template Parameter Column 2" dataDxfId="61"/>
++    <tableColumn id="20" xr3:uid="{00000000-0010-0000-0600-000014000000}" name="Template Parameter Column 3" dataDxfId="60"/>
++    <tableColumn id="5" xr3:uid="{00000000-0010-0000-0600-000005000000}" name="Definition" dataDxfId="59"/></tableColumns><tableStyleInfo name="TableStyleLight9" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>
 \ No newline at end of file
 ```
