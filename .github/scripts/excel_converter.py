@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
-Excel XML Conversion for GitHub Actions
-Extracts VBA code and table structure, commits to Git for proper diffing
+Complete Excel Tracker for GitHub Actions
+- Extracts only table structure (useful XML files)
+- Adds Git-native cell change tracking
+- Professional function names and clean code structure
 """
 
 import os
@@ -11,11 +13,12 @@ import zipfile
 import glob
 import git
 import re
-import time  # ADD THIS MISSING IMPORT
+import time
+import hashlib
 from pathlib import Path
 
-def extract_excel_selective(excel_path):
-    """Extract only VBA and table definitions from Excel file - MANAGER'S FINAL VERSION"""
+def extract_excel_tables_only(excel_path):
+    """Extract only table definitions from Excel file - clean selective extraction"""
     excel_dir = Path(excel_path).with_suffix('')
     
     # Create directory if it doesn't exist
@@ -28,43 +31,149 @@ def extract_excel_selective(excel_path):
     with zipfile.ZipFile(excel_path, 'r') as zip_ref:
         zip_ref.extractall(temp_dir)
     
-    # Copy only essential files
-    essential_files = ['[Content_Types].xml', 'Content_Types.xml', '_rels/.rels']
-    for file in essential_files:
-        src = temp_dir / file
-        if src.exists():
-            dst = excel_dir / file
-            os.makedirs(dst.parent, exist_ok=True)
-            shutil.copy2(src, dst)
-    
-    # Copy VBA files
-    for vba_path in ['xl/vbaProject.bin', 'xl/_rels/vbaProject.bin.rels', 'xl/vba/']:
-        src = temp_dir / vba_path
-        if src.exists():
-            dst = excel_dir / vba_path
-            if src.is_dir():
-                shutil.copytree(src, dst, dirs_exist_ok=True)
-            else:
-                os.makedirs(dst.parent, exist_ok=True)
-                shutil.copy2(src, dst)
-    
-    # MANAGER'S REQUEST: Copy ONLY table definitions (skip styles.xml and workbook.xml)
+    # Copy ONLY table definitions (the useful files)
     tables_dir = temp_dir / 'xl/tables'
     if tables_dir.exists():
         dst_tables = excel_dir / 'xl/tables'
         shutil.copytree(tables_dir, dst_tables, dirs_exist_ok=True)
-    
-    # REMOVED: workbook.xml and styles.xml (manager doesn't need them)
-    # workbook_files = ['xl/workbook.xml', 'xl/styles.xml', 'xl/_rels/workbook.xml.rels']
+        print(f"✅ Extracted table structure from {excel_path}")
+    else:
+        print(f"⚠️ No tables found in {excel_path}")
     
     # Clean up temp directory
     shutil.rmtree(temp_dir)
     
-    print(f"Extracted VBA and table structure from {excel_path} to {excel_dir}/")
+    print(f"Extracted table definitions from {excel_path} to {excel_dir}/")
     return excel_dir
 
-def format_xml_files(directory):
-    """Format XML files - PRESERVE FORMULA INDENTATION as manager requested"""
+def extract_cells_for_git_tracking(excel_path):
+    """Extract cell data to simple text files for Git-native diff tracking"""
+    try:
+        import openpyxl
+        
+        print(f"📊 Extracting cells for Git tracking: {excel_path}")
+        start_time = time.time()
+        
+        wb = openpyxl.load_workbook(excel_path, data_only=True, read_only=True)
+        
+        # Create cells directory
+        excel_dir = Path(excel_path).with_suffix('')
+        cells_dir = excel_dir / 'cells'
+        os.makedirs(cells_dir, exist_ok=True)
+        
+        total_cells = 0
+        worksheets_processed = []
+        
+        for ws_name in wb.sheetnames:
+            # Skip excluded worksheets for performance
+            if any(skip in ws_name.lower() for skip in ['rawdata', 'import', 'temp', 'archive', 'backup']):
+                print(f"   ⏭️ Skipping {ws_name} (excluded)")
+                continue
+            
+            ws = wb[ws_name]
+            
+            # Create clean filename for worksheet
+            safe_name = re.sub(r'[^\w\s-]', '', ws_name).strip()
+            safe_name = re.sub(r'[-\s]+', '_', safe_name)
+            worksheet_file = cells_dir / f"{safe_name}.txt"
+            
+            cell_lines = []
+            cell_count = 0
+            
+            # Extract all cells with data
+            for row in ws.iter_rows(values_only=False):
+                for cell in row:
+                    if cell.value is not None:
+                        cell_ref = cell.coordinate
+                        cell_value = str(cell.value)[:500]  # Truncate very long values
+                        cell_type = type(cell.value).__name__
+                        
+                        # Format: CELL_REF=TYPE:VALUE (Git-diff friendly)
+                        line = f"{cell_ref}={cell_type}:{cell_value}"
+                        cell_lines.append(line)
+                        cell_count += 1
+                        
+                        # Progress for large sheets
+                        if cell_count % 10000 == 0:
+                            print(f"      📈 {ws_name}: processed {cell_count} cells...")
+            
+            # Sort for consistent Git diffs (A1, A2, A3, B1, B2...)
+            def sort_key(line):
+                cell_ref = line.split('=')[0]
+                # Extract column letters and row numbers
+                col_match = re.match(r'([A-Z]+)(\d+)', cell_ref)
+                if col_match:
+                    col_letters, row_num = col_match.groups()
+                    # Convert column letters to number for sorting
+                    col_num = 0
+                    for char in col_letters:
+                        col_num = col_num * 26 + (ord(char) - ord('A') + 1)
+                    return (int(row_num), col_num)
+                return (0, 0)
+            
+            cell_lines.sort(key=sort_key)
+            
+            # Write worksheet cells to file
+            with open(worksheet_file, 'w', encoding='utf-8') as f:
+                f.write(f"# Worksheet: {ws_name}\n")
+                f.write(f"# Cells: {cell_count}\n")
+                f.write(f"# Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(f"# Excel File: {Path(excel_path).name}\n")
+                f.write("\n")
+                
+                for line in cell_lines:
+                    f.write(line + "\n")
+            
+            total_cells += cell_count
+            worksheets_processed.append((ws_name, cell_count))
+            print(f"   ✅ {ws_name}: {cell_count} cells → {worksheet_file.name}")
+        
+        # Create summary file
+        create_cell_summary(cells_dir, total_cells, excel_path, worksheets_processed)
+        
+        wb.close()
+        
+        elapsed = time.time() - start_time
+        print(f"   🎯 Total: {total_cells} cells in {elapsed:.2f}s")
+        
+        return cells_dir, total_cells
+        
+    except ImportError:
+        print("❌ openpyxl not available - install with: pip install openpyxl")
+        return None, 0
+    except Exception as e:
+        print(f"❌ Error extracting cells: {e}")
+        return None, 0
+
+def create_cell_summary(cells_dir, total_cells, excel_path, worksheets_processed):
+    """Create a summary file for quick overview"""
+    summary_file = cells_dir / "_SUMMARY.txt"
+    
+    with open(summary_file, 'w') as f:
+        f.write(f"Excel Cell Data Summary\n")
+        f.write(f"=" * 50 + "\n")
+        f.write(f"Excel File: {Path(excel_path).name}\n")
+        f.write(f"Total Cells: {total_cells:,}\n")
+        f.write(f"Extraction Time: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"File Size: {os.path.getsize(excel_path) / (1024*1024):.1f} MB\n")
+        f.write(f"\nWorksheets Processed:\n")
+        
+        for ws_name, cell_count in worksheets_processed:
+            f.write(f"  - {ws_name}: {cell_count:,} cells\n")
+        
+        # Create checksum for quick change detection
+        all_content = ""
+        for worksheet_file in sorted(cells_dir.glob("*.txt")):
+            if worksheet_file.name != "_SUMMARY.txt":
+                with open(worksheet_file, 'r') as wf:
+                    all_content += wf.read()
+        
+        checksum = hashlib.md5(all_content.encode()).hexdigest()[:16]
+        f.write(f"\nData Checksum: {checksum}\n")
+        f.write(f"\nTo see changes: git diff HEAD~1 {cells_dir.relative_to(Path.cwd())}/\n")
+
+def format_table_xml_files(directory):
+    """Format table XML files with complete DxfId removal and formula preservation"""
     try:
         xml_count = 0
         
@@ -81,26 +190,78 @@ def format_xml_files(directory):
                         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                             content = f.read()
                         
-                        # MANAGER'S REQUIREMENT 1: Remove DxfId attributes completely
-                        import re
-                        before_count = content.count('DxfId=')
-                        content = re.sub(r'\s+DxfId="[^"]*"', '', content)
-                        after_count = content.count('DxfId=')
-                        removed_count = before_count - after_count
-                        if removed_count > 0:
-                            print(f"🗑️ Removed {removed_count} DxfId attributes from {os.path.basename(file_path)}")
+                        # STEP 1: Extract and preserve formulas BEFORE any processing
+                        formula_placeholders = {}
+                        placeholder_counter = 0
                         
-                        # Entity decoding
+                        def extract_formula(match):
+                            nonlocal placeholder_counter
+                            tag_name = match.group(1)
+                            formula_content = match.group(2)
+                            
+                            # Create unique placeholder
+                            placeholder = f"__FORMULA_PLACEHOLDER_{placeholder_counter}__"
+                            placeholder_counter += 1
+                            
+                            # Store original formula content with ZERO modification
+                            formula_placeholders[placeholder] = {
+                                'tag': tag_name,
+                                'content': formula_content  # EXACT content from Excel
+                            }
+                            
+                            # Replace with placeholder
+                            return f"<{tag_name}>{placeholder}</{tag_name}>"
+                        
+                        # Extract calculatedColumnFormula
+                        content = re.sub(
+                            r'<(calculatedColumnFormula)>(.*?)</\1>',
+                            extract_formula,
+                            content,
+                            flags=re.DOTALL
+                        )
+                        
+                        # Extract regular formula tags
+                        content = re.sub(
+                            r'<(formula)>(.*?)</\1>',
+                            extract_formula,
+                            content,
+                            flags=re.DOTALL
+                        )
+                        
+                        # STEP 2: Remove ALL DxfId attributes completely
+                        dxf_patterns = [
+                            r'\s+DxfId="[^"]*"',           # DxfId="123"
+                            r'\s+headerRowDxfId="[^"]*"',  # headerRowDxfId="200" 
+                            r'\s+headerRowDxfID="[^"]*"',  # Case variation
+                            r'\s+dataDxfId="[^"]*"',       # dataDxfId="200"
+                            r'\s+dataDxfID="[^"]*"',       # Case variation
+                            r'\s+totalsRowDxfId="[^"]*"',  # totalsRowDxfId="200"
+                            r'\s+totalsRowDxfID="[^"]*"',  # Case variation
+                            r'\s+dxfId="[^"]*"',           # lowercase version
+                        ]
+                        
+                        total_removed = 0
+                        for pattern in dxf_patterns:
+                            before_matches = re.findall(pattern, content)
+                            content = re.sub(pattern, '', content)
+                            after_matches = re.findall(pattern, content)
+                            removed = len(before_matches) - len(after_matches)
+                            total_removed += removed
+                        
+                        if total_removed > 0:
+                            print(f"🗑️ Removed {total_removed} DxfId attributes from {os.path.basename(file_path)}")
+                        
+                        # STEP 3: Entity decoding
                         content = content.replace('&amp;', '&')
                         content = content.replace('&lt;', '<')
                         content = content.replace('&gt;', '>')
                         content = content.replace('&quot;', '"')
                         content = content.replace('&apos;', "'")
                         
-                        # MANAGER'S REQUIREMENT 2: Specific newlines + PRESERVE INDENTATION
-                        content = add_manager_newlines_preserve_indentation(content)
+                        # STEP 4: Add requested newlines
+                        content = add_table_xml_newlines(content)
                         
-                        # SIMPLIFIED XML formatting - DON'T STRIP CONTENT INDENTATION
+                        # STEP 5: Basic XML formatting (but NOT for formula content)
                         lines = content.split('\n')
                         formatted_lines = []
                         indent_level = 0
@@ -111,83 +272,64 @@ def format_xml_files(directory):
                             if not stripped:
                                 continue
                             
-                            # Check if this line is inside a formula tag
-                            is_formula_content = (not stripped.startswith('<') and 
-                                                not stripped.startswith('<?') and
-                                                any(tag in line for tag in ['calculatedColumnFormula>', 'formula>']))
+                            # Check if this line contains a formula placeholder
+                            has_formula_placeholder = any(placeholder in line for placeholder in formula_placeholders.keys())
                             
-                            # Closing tags
-                            if stripped.startswith('</'):
+                            if has_formula_placeholder:
+                                # Don't indent lines with formula placeholders
+                                formatted_lines.append(stripped)
+                            elif stripped.startswith('</'):
+                                # Closing tags
                                 indent_level = max(0, indent_level - 1)
                                 formatted_lines.append('    ' * indent_level + stripped)
-                            # Self-closing tags
                             elif stripped.endswith('/>'):
+                                # Self-closing tags
                                 formatted_lines.append('    ' * indent_level + stripped)
-                            # Opening tags
                             elif stripped.startswith('<') and not stripped.startswith('<?'):
+                                # Opening tags
                                 formatted_lines.append('    ' * indent_level + stripped)
                                 if not stripped.endswith('/>'):
                                     indent_level += 1
-                            # XML declaration
                             elif stripped.startswith('<?'):
+                                # XML declaration
                                 formatted_lines.append(stripped)
-                            # Content - PRESERVE FORMULA INDENTATION
-                            elif is_formula_content:
-                                # For formula content, preserve the original line spacing
-                                formatted_lines.append(line.rstrip())  # Remove only trailing spaces
                             else:
-                                # For other content, use normal indentation
+                                # Regular content
                                 formatted_lines.append('    ' * indent_level + stripped)
                         
+                        content = '\n'.join(formatted_lines)
+                        
+                        # STEP 6: Restore formulas with ZERO modification
+                        for placeholder, formula_data in formula_placeholders.items():
+                            tag_name = formula_data['tag']
+                            original_content = formula_data['content']
+                            
+                            # Put back the original formula with NO indentation changes
+                            restored_formula = f"<{tag_name}>{original_content}</{tag_name}>"
+                            content = content.replace(f"<{tag_name}>{placeholder}</{tag_name}>", restored_formula)
+                        
                         with open(file_path, 'w', encoding='utf-8') as f:
-                            f.write('\n'.join(formatted_lines))
+                            f.write(content)
                         
                         xml_count += 1
+                        
+                        # Report on formula preservation
+                        if formula_placeholders:
+                            print(f"✅ Preserved {len(formula_placeholders)} formulas unchanged in {os.path.basename(file_path)}")
+                        
+                        # Special handling for table files
+                        if 'table' in file_path.lower():
+                            print(f"✅ Processed table XML: {os.path.basename(file_path)}")
+                            
                     except Exception as e:
                         print(f"Error formatting {file_path}: {e}")
         
-        print(f"✅ Formatted {xml_count} XML files with DxfId removal and preserved formula indentation")
+        print(f"✅ Formatted {xml_count} XML files with complete DxfId removal and formula preservation")
     except Exception as e:
         print(f"Warning: XML formatting failed - {e}")
 
-def add_manager_newlines_preserve_indentation(content):
-    """Add newlines at manager's specific locations while preserving formula indentation"""
-    import re
-    
-    def fix_formula_tag_preserve_indent(match):
-        tag_name = match.group(1)  # calculatedColumnFormula or formula
-        formula_content = match.group(2)
-        
-        # MANAGER'S REQUEST: Preserve the original indentation in formulas
-        # Don't strip leading spaces - keep them exactly as they were
-        formula_lines = []
-        for line in formula_content.split('\n'):
-            if line.strip():  # Only keep non-empty lines
-                formula_lines.append(line.rstrip())  # Remove trailing spaces but KEEP leading spaces
-        
-        if not formula_lines:
-            return f"<{tag_name}></{tag_name}>"
-        
-        # Join with newlines but preserve the original indentation
-        formatted_formula = '\n'.join(formula_lines)
-        
-        return f"<{tag_name}>\n{formatted_formula}\n</{tag_name}>"
-    
-    # Apply to calculatedColumnFormula tags - PRESERVE INDENTATION
-    content = re.sub(
-        r'<(calculatedColumnFormula)>(.*?)</\1>',
-        fix_formula_tag_preserve_indent,
-        content,
-        flags=re.DOTALL
-    )
-    
-    # Apply to regular formula tags - PRESERVE INDENTATION
-    content = re.sub(
-        r'<(formula)>(.*?)</\1>',
-        fix_formula_tag_preserve_indent,
-        content,
-        flags=re.DOTALL
-    )
+def add_table_xml_newlines(content):
+    """Add specific newlines for better table XML readability"""
     
     # Add newlines before <tableColumn> tags
     content = re.sub(
@@ -196,36 +338,19 @@ def add_manager_newlines_preserve_indentation(content):
         content
     )
     
+    # Add newlines before other table elements if needed
+    table_elements = ['tableColumns', 'autoFilter', 'sortState']
+    for element in table_elements:
+        content = re.sub(
+            f'([^\\n])(<{element})',
+            r'\1\n\2',
+            content
+        )
+    
     return content
 
-def package_xml_to_excel(xml_dir):
-    """Package XML directory back to Excel file"""
-    excel_path = Path(f"{xml_dir}.xlsx")
-    
-    if excel_path.exists():
-        overwritten_path = excel_path.with_name(f"{excel_path.stem}_overwritten{excel_path.suffix}")
-        shutil.copy2(excel_path, overwritten_path)
-        print(f"Created backup at {overwritten_path}")
-    
-    temp_zip = excel_path.with_suffix('.zip')
-    
-    with zipfile.ZipFile(temp_zip, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:
-        for root, _, files in os.walk(xml_dir):
-            for file in files:
-                file_path = os.path.join(root, file)
-                arcname = os.path.relpath(file_path, os.path.dirname(xml_dir))
-                zipf.write(file_path, arcname)
-    
-    if temp_zip.exists():
-        if excel_path.exists():
-            excel_path.unlink()
-        temp_zip.rename(excel_path)
-        print(f"Created Excel file at {excel_path}")
-    
-    return excel_path
-
-def get_changed_files():
-    """Get list of changed files from the most recent commit"""
+def get_changed_excel_files():
+    """Get list of changed Excel files from the most recent commit"""
     repo = git.Repo('.')
     
     try:
@@ -233,13 +358,17 @@ def get_changed_files():
             diffs = repo.git.diff('HEAD~1', '--name-only').split('\n')
         else:
             diffs = repo.git.ls_files().split('\n')
-        return diffs
+        
+        # Filter for Excel files only
+        excel_files = [f for f in diffs if f.endswith(('.xlsx', '.xlsm'))]
+        return excel_files
     except git.exc.GitCommandError:
-        return repo.git.ls_files().split('\n')
+        all_files = repo.git.ls_files().split('\n')
+        return [f for f in all_files if f.endswith(('.xlsx', '.xlsm'))]
 
-def cleanup_generated_files():
-    """Clean up previously generated files to avoid processing duplicates"""
-    print("🧹 CLEANING UP GENERATED FILES...")
+def cleanup_temporary_files():
+    """Clean up previously generated temporary files"""
+    print("🧹 CLEANING UP TEMPORARY FILES...")
     
     cleanup_patterns = [
         '**/*_fromXML.xlsx',
@@ -262,11 +391,13 @@ def cleanup_generated_files():
             except Exception as e:
                 print(f"⚠️ Could not remove {file_path}: {e}")
     
-    # Also clean up extracted directories
+    # Clean up old extracted directories (but keep the ones we create)
     for item in Path('.').rglob('*'):
         if (item.is_dir() and 
             item.name.endswith(('.xlsx', '.xlsm')) and
-            item.name != item.parent.name):  # Avoid infinite recursion
+            item.name != item.parent.name and
+            not (item / 'cells').exists() and
+            not (item / 'xl' / 'tables').exists()):
             try:
                 shutil.rmtree(item)
                 print(f"🗂️ Removed directory: {item}")
@@ -276,20 +407,20 @@ def cleanup_generated_files():
     
     print(f"✅ Cleanup completed: {cleaned_count} items removed")
 
-def process_excel_files():
-    """Process Excel files with aggressive filtering to avoid timeout"""
-    print("=== STARTING EXCEL PROCESSING WITH DUPLICATE FILTERING ===")
+def process_excel_files_complete():
+    """Process Excel files with table extraction and cell tracking"""
+    print("=== STARTING EXCEL PROCESSING WITH TABLE + CELL TRACKING ===")
     start_time = time.time()
     
     # Get changed files first (most important)
-    changed_files = get_changed_files()
+    changed_files = get_changed_excel_files()
     excel_files = [f for f in changed_files if f.endswith(('.xlsx', '.xlsm'))]
     
     # If no changed files, get all files but filter heavily
     if not excel_files:
         all_files = glob.glob('**/*.xlsx', recursive=True) + glob.glob('**/*.xlsm', recursive=True)
         
-        # AGGRESSIVE FILTERING
+        # Filter out temporary and generated files
         filtered_files = []
         for file_path in all_files:
             # Skip generated files
@@ -306,7 +437,7 @@ def process_excel_files():
                 print(f"⏭️ Skipping nested file: {file_path}")
                 continue
             
-            # Skip large files
+            # Check file size
             if os.path.exists(file_path):
                 file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
                 if file_size_mb > 15:  # 15MB limit
@@ -315,7 +446,7 @@ def process_excel_files():
                 
                 filtered_files.append((file_path, file_size_mb))
         
-        # Sort by size and take only the smallest 3 files
+        # Sort by size and take only the smallest files for performance
         filtered_files.sort(key=lambda x: x[1])
         excel_files = [f[0] for f in filtered_files[:3]]
         
@@ -344,20 +475,26 @@ def process_excel_files():
         file_start = time.time()
         
         try:
-            # Use selective extraction
-            extract_dir = extract_excel_selective(excel_file)
+            # STEP 1: Extract table definitions only
+            extract_dir = extract_excel_tables_only(excel_file)
             if not extract_dir:
                 continue
             
-            # Skip XML formatting to save time
-            print("🎨 Formatting XML files for better Git diffing...")
-            format_xml_files(extract_dir)
+            # STEP 2: Format table XML files
+            print("🎨 Formatting table XML files...")
+            format_table_xml_files(extract_dir)
             
-            # Add to git
+            # STEP 3: Extract cells for Git-native diff tracking
+            print("📊 Extracting cells for Git-native tracking...")
+            cells_dir, cell_count = extract_cells_for_git_tracking(excel_file)
+            if cells_dir:
+                print(f"✅ Extracted {cell_count:,} cells to {cells_dir}")
+            
+            # Add everything to git
             repo = git.Repo('.')
             repo.git.add(str(extract_dir))
             
-            # Create _fromXML copy
+            # Create backup copy
             fromxml_path = Path(excel_file).with_name(
                 f"{Path(excel_file).stem}_fromXML{Path(excel_file).suffix}"
             )
@@ -378,18 +515,18 @@ def process_excel_files():
     print(f"=== COMPLETED: {processed_count} files in {total_elapsed:.1f}s ===")
     return excel_files
 
-def process_xml_files():
-    """Process XML files but don't package back to Excel"""
-    changed_files = get_changed_files()
+def find_table_xml_directories():
+    """Find directories with table XML changes"""
+    changed_files = get_changed_excel_files()
     
     xml_dirs = set()
     for changed_file in changed_files:
-        if changed_file.endswith('.xml') or '/xl/' in changed_file or '/_rels/' in changed_file:
+        if changed_file.endswith('.xml') or '/xl/tables/' in changed_file:
             path = Path(changed_file)
             current_dir = path.parent
             
             while str(current_dir) != '.':
-                if (current_dir / 'Content_Types.xml').exists() or (current_dir / '[Content_Types].xml').exists():
+                if (current_dir / 'xl' / 'tables').exists():
                     xml_dirs.add(str(current_dir))
                     break
                 
@@ -398,105 +535,141 @@ def process_xml_files():
                 
                 current_dir = current_dir.parent
     
-    # Don't package back to Excel - just return directories for diff reporting
-    print(f"Found {len(xml_dirs)} XML directories with changes")
+    print(f"Found {len(xml_dirs)} directories with table changes")
     return list(xml_dirs)
 
-def generate_xml_diff_report(xml_dirs):
-    """Generate diff report for VBA and table changes"""
+def generate_table_diff_report(xml_dirs):
+    """Generate diff report for table structure changes"""
     try:
-        reports_dir = Path("xml-diff-reports")
+        reports_dir = Path("table-diff-reports")
         os.makedirs(reports_dir, exist_ok=True)
         repo = git.Repo('.')
         
         for xml_dir in xml_dirs:
-            summary_file = reports_dir / f"{Path(xml_dir).name}-summary.md"
+            summary_file = reports_dir / f"{Path(xml_dir).name}-table-changes.md"
             
             with open(summary_file, 'w') as f:
-                f.write(f"# VBA and Table Changes for {xml_dir}\n\n")
+                f.write(f"# Table Structure Changes for {xml_dir}\n\n")
                 
-                vba_changes = []
                 table_changes = []
                 total_changes = 0
                 
-                for root, _, files in os.walk(xml_dir):
-                    for file in files:
-                        if file.endswith('.xml'):
-                            file_path = os.path.join(root, file)
-                            rel_path = os.path.relpath(file_path, '.')
-                            
-                            try:
-                                diff = repo.git.diff('HEAD~1', file_path)
+                tables_path = os.path.join(xml_dir, 'xl', 'tables')
+                if os.path.exists(tables_path):
+                    for root, _, files in os.walk(tables_path):
+                        for file in files:
+                            if file.endswith('.xml'):
+                                file_path = os.path.join(root, file)
+                                rel_path = os.path.relpath(file_path, '.')
                                 
-                                if not diff:
-                                    continue
+                                try:
+                                    diff = repo.git.diff('HEAD~1', file_path)
                                     
-                                added = diff.count('\n+')
-                                removed = diff.count('\n-')
-                                changes = added + removed
-                                
-                                if changes > 0:
-                                    total_changes += changes
+                                    if not diff:
+                                        continue
+                                        
+                                    added = diff.count('\n+')
+                                    removed = diff.count('\n-')
+                                    changes = added + removed
                                     
-                                    if 'vba' in rel_path.lower():
-                                        vba_changes.append((rel_path, changes))
-                                    elif 'tables' in rel_path.lower():
+                                    if changes > 0:
+                                        total_changes += changes
                                         table_changes.append((rel_path, changes))
                                         
-                            except Exception as e:
-                                f.write(f"Error analyzing {rel_path}: {e}\n\n")
+                                except Exception as e:
+                                    f.write(f"Error analyzing {rel_path}: {e}\n\n")
                 
                 f.write(f"**Total changes:** {total_changes} lines\n\n")
-                
-                if vba_changes:
-                    f.write("## VBA Code Changes\n\n")
-                    for file_path, changes in vba_changes:
-                        f.write(f"- **{file_path}**: {changes} lines changed\n")
-                    f.write("\n")
                 
                 if table_changes:
                     f.write("## Table Structure Changes\n\n")
                     for file_path, changes in table_changes:
                         f.write(f"- **{file_path}**: {changes} lines changed\n")
                     f.write("\n")
+                else:
+                    f.write("No table structure changes detected.\n\n")
             
-            # Create detailed diffs
-            details_dir = reports_dir / f"{Path(xml_dir).name}-details"
-            os.makedirs(details_dir, exist_ok=True)
-            
-            all_changes = vba_changes + table_changes
-            for file_path, changes in sorted(all_changes, key=lambda x: x[1], reverse=True)[:10]:
-                try:
-                    full_path = os.path.join('.', file_path)
-                    
-                    file_size_mb = os.path.getsize(full_path) / (1024 * 1024)
-                    if file_size_mb > 20:
-                        continue
-                    
-                    detail_file = details_dir / f"{Path(file_path).name.replace('.', '_')}-diff.md"
-                    
-                    with open(detail_file, 'w') as f:
-                        f.write(f"# Changes in {file_path}\n\n")
-                        
-                        diff = repo.git.diff('HEAD~1', full_path)
-                        
-                        # Process for readability
-                        processed_diff = diff.replace('&amp;', '[&]').replace('&lt;', '[<]').replace('&gt;', '[>]').replace('&quot;', '["]')
-                        
-                        f.write("```diff\n")
-                        f.write(processed_diff)
-                        f.write("\n```\n")
-                except Exception as e:
-                    print(f"Error creating detail report for {file_path}: {e}")
-            
-            print(f"Created XML diff reports for {xml_dir}")
+            print(f"Created table diff report for {xml_dir}")
         
         return reports_dir
     except Exception as e:
-        print(f"Warning: Failed to generate XML diff report - {e}")
+        print(f"Warning: Failed to generate table diff report - {e}")
         return None
 
-def commit_changes():
+def generate_cell_changes_summary():
+    """Generate a summary of cell changes using Git's native diff"""
+    try:
+        reports_dir = Path("cell-diff-reports")
+        os.makedirs(reports_dir, exist_ok=True)
+        
+        repo = git.Repo('.')
+        
+        # Find all cell directories
+        cell_dirs = []
+        for item in Path('.').rglob('cells'):
+            if item.is_dir():
+                cell_dirs.append(item)
+        
+        if not cell_dirs:
+            print("No cell tracking directories found")
+            return
+        
+        summary_file = reports_dir / "cell_changes_summary.md"
+        
+        with open(summary_file, 'w') as f:
+            f.write("# 📊 Excel Cell Changes Summary\n\n")
+            f.write(f"Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+            
+            total_files_changed = 0
+            
+            for cells_dir in cell_dirs:
+                excel_name = cells_dir.parent.name
+                f.write(f"## 📁 {excel_name}\n\n")
+                
+                # Check for changes in this cells directory
+                try:
+                    diff_output = repo.git.diff('HEAD~1', str(cells_dir), name_only=True)
+                    if diff_output:
+                        changed_files = diff_output.strip().split('\n')
+                        f.write(f"**Files with changes:** {len(changed_files)}\n\n")
+                        
+                        for changed_file in changed_files:
+                            if changed_file.endswith('.txt'):
+                                worksheet_name = Path(changed_file).stem
+                                f.write(f"### 📋 {worksheet_name}\n")
+                                
+                                # Get the actual diff
+                                try:
+                                    diff_content = repo.git.diff('HEAD~1', changed_file)
+                                    if diff_content:
+                                        # Count changes
+                                        added_lines = diff_content.count('\n+')
+                                        removed_lines = diff_content.count('\n-')
+                                        
+                                        f.write(f"- **Changes:** +{added_lines} -{removed_lines} lines\n")
+                                        f.write(f"- **View diff:** `git diff HEAD~1 {changed_file}`\n\n")
+                                        
+                                        total_files_changed += 1
+                                except:
+                                    f.write("- Could not get diff details\n\n")
+                    else:
+                        f.write("**No changes detected**\n\n")
+                        
+                except Exception as e:
+                    f.write(f"**Error checking changes:** {e}\n\n")
+            
+            f.write(f"---\n**Total Excel files with cell changes:** {total_files_changed}\n\n")
+            f.write("💡 **To see detailed changes:**\n")
+            f.write("- Click on any `.txt` file in the cells/ directories\n")
+            f.write("- View the file history in GitHub\n")
+            f.write("- Git will show you exactly which cells changed!\n")
+        
+        print(f"📊 Generated cell changes summary: {summary_file}")
+        
+    except Exception as e:
+        print(f"Warning: Could not generate cell diff summary - {e}")
+
+def commit_all_changes():
     """Commit any changes and push to repository"""
     repo = git.Repo('.')
     
@@ -517,7 +690,7 @@ def commit_changes():
                 print(f"Pull error (non-critical): {e}")
             
             repo.git.add(A=True)
-            commit_msg = "Excel VBA/Table Structure Extraction [skip ci]"
+            commit_msg = "Excel Analysis: Table Structure + Cell Data Tracking [skip ci]"
             repo.git.commit('-m', commit_msg)
             
             repo.git.push('origin', branch)
@@ -527,34 +700,57 @@ def commit_changes():
             print(f"Git push error: {e}")
 
 def main():
-    """Main function to process files"""
-    print("🚀 STARTING: Excel VBA/Table extraction...")
+    """Main function to process Excel files with table and cell tracking"""
+    print("🚀 STARTING: Excel Table Structure + Cell Data Analysis...")
     
-    # STEP 1: Clean up first
-    print("🧹 STEP 1: Starting cleanup_generated_files()...")
-    cleanup_generated_files()
-    print("✅ STEP 1: cleanup_generated_files() completed")
+    # STEP 1: Clean up temporary files
+    print("🧹 STEP 1: Starting cleanup...")
+    cleanup_temporary_files()
+    print("✅ STEP 1: Cleanup completed")
     
-    # STEP 2: Process with filtering  
-    print("📁 STEP 2: Starting process_excel_files()...")
-    excel_files = process_excel_files()
-    print(f"✅ STEP 2: process_excel_files() completed - {len(excel_files)} files")
+    # STEP 2: Process Excel files with table extraction and cell tracking
+    print("📁 STEP 2: Starting Excel file processing...")
+    excel_files = process_excel_files_complete()
+    print(f"✅ STEP 2: Excel processing completed - {len(excel_files)} files")
     
-    # STEP 3: Continue with rest
-    print("🔍 STEP 3: Starting process_xml_files()...")
-    xml_dirs = process_xml_files()
-    print(f"✅ STEP 3: process_xml_files() completed - {len(xml_dirs)} directories")
+    # STEP 3: Find directories with table changes
+    print("🔍 STEP 3: Finding table XML directories...")
+    xml_dirs = find_table_xml_directories()
+    print(f"✅ STEP 3: Found {len(xml_dirs)} directories with changes")
     
-    print("📊 STEP 4: Starting generate_xml_diff_report()...")
+    # STEP 4: Generate table structure diff reports
+    print("📊 STEP 4: Generating table diff reports...")
     if xml_dirs:
-        generate_xml_diff_report(xml_dirs)
-    print("✅ STEP 4: generate_xml_diff_report() completed")
+        generate_table_diff_report(xml_dirs)
+    print("✅ STEP 4: Table diff reports completed")
     
-    print("📤 STEP 5: Starting commit_changes()...")
-    commit_changes()
-    print("✅ STEP 5: commit_changes() completed")
+    # STEP 5: Generate cell changes summary
+    print("📋 STEP 5: Generating cell changes summary...")
+    generate_cell_changes_summary()
+    print("✅ STEP 5: Cell changes summary completed")
     
-    print("🏁 COMPLETED: Excel VBA/Table extraction completed")
+    # STEP 6: Commit everything to Git
+    print("📤 STEP 6: Committing changes...")
+    commit_all_changes()
+    print("✅ STEP 6: Changes committed and pushed")
+    
+    print("🏁 COMPLETED: Excel Analysis")
+    print("=" * 60)
+    print("📊 What was tracked:")
+    print("  ✅ Table Structure Changes (xl/tables/*.xml)")
+    print("  ✅ Cell Data Changes (cells/*.txt)")
+    print("  ✅ Git-native diff tracking for all changes")
+    print("  ✅ Human-readable reports generated")
+    print("")
+    print("🔍 To view changes:")
+    print("  • GitHub: Click on any file → History → Select commit")
+    print("  • Command line: git diff HEAD~1")
+    print("  • Reports: Check table-diff-reports/ and cell-diff-reports/")
+    print("")
+    print("📁 Files extracted per Excel file:")
+    print("  • xl/tables/ - Table structure definitions")
+    print("  • cells/ - Cell data in Git-friendly format")
+    print("  • No metadata files (Content_Types.xml, _rels/) - removed as requested")
 
 if __name__ == "__main__":
     main()
