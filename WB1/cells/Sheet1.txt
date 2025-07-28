@@ -1,0 +1,15 @@
+# Worksheet: Sheet1
+# Cells: 10
+# Generated: 2025-07-28 13:10:31
+# Excel File: WB1.xlsx
+
+A1=str:Column1
+B1=str:Column2
+C1=str:Column3
+D1=str:Column4
+D2=int:0
+A3=int:1
+B3=int:2
+D3=int:-1
+D4=int:0
+D5=int:0
